@@ -23,38 +23,89 @@
 */
 
 #include "ztime.hpp"
+
 #include <ctime>
+#include <time.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/timeb.h>
+
 #include <thread>
 #include <vector>
 #include <algorithm>
 #include <cctype>
-#include <sys/timeb.h>
-#include <stdio.h>
 
 namespace ztime {
 
-    timestamp_t get_timestamp() {
-        time_t rawtime;
-        time(&rawtime);
-        struct tm* ptm;
-
-        ptm = gmtime(&rawtime);
-        //DateTime iTime(ptm->tm_mday, ptm->tm_mon + 1, ptm->tm_year + 1900, ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
-        //return iTime.get_timestamp();
-        return get_timestamp(ptm->tm_mday, ptm->tm_mon + 1, ptm->tm_year + 1900, ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+    const timestamp_t get_timestamp() noexcept {
+        // https://en.cppreference.com/w/c/chrono/timespec_get
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return ts.tv_sec;
     }
 
-    ftimestamp_t get_ftimestamp() {
-        timestamp_t t = get_timestamp();
-        timeb tb;
-        ftime(&tb);
-        return (ftimestamp_t)t + (ftimestamp_t)tb.millitm/1000.0;
+    const timestamp_t get_timestamp_ms() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return MILLISECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000000;
     }
 
-    uint32_t get_millisecond() {
-        timeb tb;
-        ftime(&tb);
-        return tb.millitm;
+    const timestamp_t get_timestamp_us() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return MICROSECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000;
+    }
+
+    const ftimestamp_t get_ftimestamp() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return (ftimestamp_t)ts.tv_sec + (ftimestamp_t)ts.tv_nsec / 1000000000.0d;
+    }
+
+    const uint32_t get_millisecond() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return ts.tv_nsec / 1000000;
+    }
+
+    const uint32_t get_microsecond() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return ts.tv_nsec / 1000;
+    }
+
+    const uint32_t get_nanosecond() noexcept {
+        struct timespec ts;
+#       if defined(CLOCK_REALTIME)
+        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
+#       else
+        timespec_get(&ts, TIME_UTC);
+#       endif
+        return ts.tv_nsec;
     }
 
     timestamp_t get_timestamp(std::string value) {
@@ -98,6 +149,8 @@ namespace ztime {
     DateTime::DateTime() :
         year(1970),
         millisecond(0),
+        microsecond(0),
+        nanosecond(0),
         second(0),
         minute(0),
         hour(0),
@@ -185,6 +238,8 @@ namespace ztime {
         const timestamp_t sec_timestamp = (timestamp_t)ftimestamp;
         set_timestamp(sec_timestamp);
         millisecond = (long)(((timestamp_t)(ftimestamp * 1000.0 + 0.5)) % 1000);
+        microsecond = (long)(((timestamp_t)(ftimestamp * 1000000.0 + 0.5)) % 1000000);
+        nanosecond = (long)(((timestamp_t)(ftimestamp * 1000000000.0 + 0.5)) % 1000000000);
     }
 
     void DateTime::print() {
@@ -1193,32 +1248,5 @@ namespace ztime {
 
     void delay(const uint64_t seconds) {
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
-    }
-
-    void for_minutes(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f) {
-        for(timestamp_t t = min_timestamp; t < max_timestamp; t += SECONDS_IN_MINUTE) {
-            f(t);
-        }
-    }
-
-    void for_hours(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f) {
-        for(timestamp_t t = min_timestamp; t < max_timestamp; t += SECONDS_IN_HOUR) {
-            f(t);
-        }
-    }
-
-    void for_days(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f) {
-        for(timestamp_t t = min_timestamp; t < max_timestamp; t += SECONDS_IN_DAY) {
-            f(t);
-        }
     }
 }

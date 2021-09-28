@@ -32,6 +32,12 @@
 #include <algorithm>
 #include <cmath>
 
+#if __cplusplus <= 201103L
+#   define ZTIME_CONSTEXPR
+#else
+#   define ZTIME_CONSTEXPR constexpr
+#endif
+
 namespace ztime {
     /* для того, чтобы можно было работать и после 19 января 2038 года,
      * используем 64 бит, а не 32 бит
@@ -47,6 +53,8 @@ namespace ztime {
 
     /// Различные периоды
     enum {
+        NANOSECONDS_IN_SECOND = 1000000000,	///< Количество наносекунд в одной секунде
+        MICROSECONDS_IN_SECOND = 1000000,	///< Количество микросекунд в одной секунде
         MILLISECONDS_IN_SECOND = 1000,		///< Количество миллисекунд в одной секунде
         MILLISECONDS_IN_MINUTE = 60000,		///< Количество миллисекунд в одной минуте
         MILLISECONDS_IN_HALF_HOUR = 1800000,///< Количество миллисекунд в получасе
@@ -153,22 +161,35 @@ namespace ztime {
         "SAT",
     }; /**< Сокращенные имена дней недели */
 
-    /** \brief Получить миллисекунду
-     * \return миллисекунда
+    /** \brief Получить миллисекунду секунды
+     * \return Миллисекунда секунды
      */
-    uint32_t get_millisecond();
+    const uint32_t get_millisecond() noexcept;
+
+    /** \brief Получить микросекунду секунды
+     * \return Микросекунда секунды
+     */
+    const uint32_t get_microsecond() noexcept;
+
+    /** \brief Получить наносекунду секунды
+     * \return Наносекунда секунды
+     */
+    const uint32_t get_nanosecond() noexcept;
 
     /** \brief Получить метку времени компьютера
      * \return Метка времени
      */
-    timestamp_t get_timestamp();
+    const timestamp_t get_timestamp() noexcept;
 
     /** \brief Получить метку времени компьютера в миллисекундах
-     * \return Метка времени
+     * \return Метка времени в миллисекундах
      */
-    inline timestamp_t get_timestamp_ms() noexcept {
-        return get_timestamp() * MILLISECONDS_IN_SECOND + get_millisecond();
-    }
+    const timestamp_t get_timestamp_ms() noexcept;
+
+    /** \brief Получить метку времени компьютера в микросекундах
+     * \return Метка времени в микросекундах
+     */
+    const timestamp_t get_timestamp_us() noexcept;
 
     /** \brief Получить метку времени
      * \param value Cтроковое представление метки времени
@@ -182,10 +203,10 @@ namespace ztime {
      */
     ftimestamp_t get_ftimestamp(const std::string &value);
 
-    /** \brief Получить метку времени компьютера с миллисекундами
-     * \return Метка времени
+    /** \brief Получить метку времени с плавающей запятой
+     * \return Метка времени с плавающей запятой
      */
-    ftimestamp_t get_ftimestamp();
+    const ftimestamp_t get_ftimestamp() noexcept;
 
     /** \brief Получить метку времени из даты и стандартного времени
      * \param day       День
@@ -196,7 +217,7 @@ namespace ztime {
      * \param second    Секунды
      * \return Метка времени
      */
-    constexpr inline timestamp_t get_timestamp(
+    ZTIME_CONSTEXPR inline timestamp_t get_timestamp(
             const uint32_t day,
             const uint32_t month,
             const uint32_t year,
@@ -231,7 +252,7 @@ namespace ztime {
      * \param milliseconds миллисекунды
      * \return метка времени
      */
-    constexpr inline ftimestamp_t get_ftimestamp(
+    ZTIME_CONSTEXPR inline ftimestamp_t get_ftimestamp(
             const uint32_t day,
             const uint32_t month,
             const uint32_t year,
@@ -278,7 +299,7 @@ namespace ztime {
      * \param oadate Дата автоматизации OLE
      * \return Метка времени
      */
-    constexpr inline timestamp_t convert_oadate_to_timestamp(const oadate_t oadate) noexcept {
+    ZTIME_CONSTEXPR inline timestamp_t convert_oadate_to_timestamp(const oadate_t oadate) noexcept {
         if(oadate < (const oadate_t)OADATE_UNIX_EPOCH) return 0;
         return (timestamp_t)((oadate - (oadate_t)OADATE_UNIX_EPOCH) * (oadate_t)SECONDS_IN_DAY);
     }
@@ -287,7 +308,7 @@ namespace ztime {
      * \param oadate Дата автоматизации OLE
      * \return Метка времени с плавающей точкой
      */
-    constexpr inline ftimestamp_t convert_oadate_to_ftimestamp(const oadate_t oadate) noexcept {
+    ZTIME_CONSTEXPR inline ftimestamp_t convert_oadate_to_ftimestamp(const oadate_t oadate) noexcept {
         if(oadate < (const oadate_t)OADATE_UNIX_EPOCH) return 0;
         return (ftimestamp_t)((oadate - (oadate_t)OADATE_UNIX_EPOCH) * (oadate_t)SECONDS_IN_DAY);
     }
@@ -309,7 +330,7 @@ namespace ztime {
      * \param millisecond   Миллисекунды
      * \return Дата автоматизации OLE
      */
-    constexpr inline oadate_t get_oadate(
+    ZTIME_CONSTEXPR inline oadate_t get_oadate(
             const uint32_t day,
             const uint32_t month,
             const uint32_t year,
@@ -345,7 +366,7 @@ namespace ztime {
      * \param year  Год
      * \return Число дней по юлианскому календарю с дробной частью (JD)
      */
-    constexpr inline double get_julian_date(
+    ZTIME_CONSTEXPR inline double get_julian_date(
             double day,
             int64_t month,
             int64_t year) {
@@ -371,7 +392,7 @@ namespace ztime {
      * \param millisecond   Миллисекунды
      * \return Число дней по юлианскому календарю с дробной частью (JD)
      */
-    constexpr inline double get_julian_date(
+    ZTIME_CONSTEXPR inline double get_julian_date(
             const uint32_t day,
             const uint32_t month,
             const uint32_t year,
@@ -399,7 +420,7 @@ namespace ztime {
      * \param year  Год
      * \return Число дней по юлианскому календарю (JDN)
      */
-    constexpr inline double get_modified_julian_day(
+    ZTIME_CONSTEXPR inline double get_modified_julian_day(
             double day,
             int64_t month,
             int64_t year) {
@@ -425,7 +446,7 @@ namespace ztime {
      * \param year  Год
      * \return Число дней по юлианскому календарю (JDN)
      */
-    constexpr inline uint64_t get_julian_day_number(
+    ZTIME_CONSTEXPR inline uint64_t get_julian_day_number(
             uint32_t day,
             uint32_t month,
             uint32_t year) {
@@ -454,7 +475,7 @@ namespace ztime {
      * \param timestamp Метка времени с плавающей точкой
      * \return Вернет значение от 0 до 1
      */
-    constexpr inline double get_moon_phase(const ftimestamp_t timestamp) {
+    ZTIME_CONSTEXPR inline double get_moon_phase(const ftimestamp_t timestamp) {
         double temp = (get_julian_date(timestamp) - 2451550.1d) / 29.530588853d;
         temp = temp - std::floor(temp);
         if (temp < 0) temp += 1.0d;
@@ -467,7 +488,7 @@ namespace ztime {
      * \param timestamp Метка времени с плавающей точкой
      * \return Вернет значение от 0 до 29.53
      */
-    constexpr inline double get_moon_age(const ftimestamp_t timestamp) {
+    ZTIME_CONSTEXPR inline double get_moon_age(const ftimestamp_t timestamp) {
         return get_moon_phase(timestamp) * 29.53d;
     }
 
@@ -548,6 +569,8 @@ namespace ztime {
     public:
         uint32_t year;          /**< год */
         uint32_t millisecond;   /**< миллисекунды */
+        uint32_t microsecond;   /**< микросекунды */
+        uint32_t nanosecond;    /**< наносекунды */
         uint8_t second;         /**< секунды */
         uint8_t minute;         /**< минуты */
         uint8_t hour;           /**< час */
@@ -559,7 +582,9 @@ namespace ztime {
         /** \brief Установить начало дня
          * Данная функция устанавливает час, минуту и секунду дня в 0
          */
-        inline void set_beg_day() {
+        inline void set_beg_day() noexcept {
+            nanosecond = 0;
+            microsecond = 0;
             millisecond = 0;
             second = 0;
             minute = 0;
@@ -568,7 +593,9 @@ namespace ztime {
 
         /** \brief Установить конец дня
          */
-        inline void set_end_day() {
+        inline void set_end_day() noexcept {
+            nanosecond = 999999999;
+            microsecond = 999999;
             millisecond = 999;
             second = 59;
             minute = 59;
@@ -577,9 +604,9 @@ namespace ztime {
 
         /** \brief Установить начало месяца
          */
-        inline void set_beg_month() {
-                set_beg_day();
-                day = 1;
+        inline void set_beg_month() noexcept {
+            set_beg_day();
+            day = 1;
         }
 
         /** \brief Установить конец месяца
@@ -635,12 +662,12 @@ namespace ztime {
         ftimestamp_t get_ftimestamp();
 
         /** \brief Установить время
-         * \param timestamp метка времени
+         * \param timestamp Метка времени
          */
         void set_timestamp(const timestamp_t timestamp);
 
-        /** \brief Установить время с миллисекундами
-         * \param timestamp метка времени
+        /** \brief Установить время с плавающей запятой
+         * \param timestamp Метка времени
          */
         void set_ftimestamp(const ftimestamp_t ftimestamp);
 
@@ -1176,7 +1203,7 @@ namespace ztime {
      * \param year  Год
      * \return Вернет true, если день месяца правильный
      */
-    constexpr inline bool is_day_of_month(
+    ZTIME_CONSTEXPR inline bool is_day_of_month(
             const uint32_t day,
             const uint32_t month,
             const uint32_t year) {
@@ -1452,42 +1479,6 @@ namespace ztime {
      */
     void delay(const uint64_t seconds);
 
-    /** \brief Цикл для минут
-     *
-     * Данная функция пройдет все метки времени от минимальной до максимальной.
-     * В цикле используется условие НЕ БОЛЬШЕ МАКСИМАЛЬНОЙ МЕТКИ ВРЕМЕННИ.
-     * \param min_timestamp Минимальная метка времени
-     * \param max_timestamp Максимальная метка времени
-     */
-    void for_minutes(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f);
-
-    /** \brief Цикл для часов
-     *
-     * Данная функция пройдет все метки времени от минимальной до максимальной.
-     * В цикле используется условие НЕ БОЛЬШЕ МАКСИМАЛЬНОЙ МЕТКИ ВРЕМЕННИ.
-     * \param min_timestamp Минимальная метка времени
-     * \param max_timestamp Максимальная метка времени
-     */
-    void for_hours(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f);
-
-    /** \brief Цикл для дней
-     *
-     * Данная функция пройдет все метки времени от минимальной до максимальной.
-     * В цикле используется условие НЕ БОЛЬШЕ МАКСИМАЛЬНОЙ МЕТКИ ВРЕМЕННИ.
-     * \param min_timestamp Минимальная метка времени
-     * \param max_timestamp Максимальная метка времени
-     */
-    void for_days(
-            const timestamp_t min_timestamp,
-            const timestamp_t max_timestamp,
-            std::function<void(const timestamp_t timestamp)> f);
-
     /** \brief Проверить пересечение периодов
      * \param a Первый период
      * \param b Второй период
@@ -1507,7 +1498,7 @@ namespace ztime {
      * \return Вернет true, если тестируемый период умещается в основной перпиод
      */
     template<class PERIOD_TYPE>
-    constexpr inline bool internal_period(
+    ZTIME_CONSTEXPR inline bool internal_period(
             const PERIOD_TYPE &test_period,
             const PERIOD_TYPE &main_period) noexcept {
         return (test_period.start >= main_period.start &&
@@ -1520,7 +1511,7 @@ namespace ztime {
      * \param periods Неотсортированный контейнер с периодами
      */
     template<class PERIOD_CONTAINER_TYPE>
-    constexpr inline void sort_periods(PERIOD_CONTAINER_TYPE &periods) noexcept {
+    ZTIME_CONSTEXPR inline void sort_periods(PERIOD_CONTAINER_TYPE &periods) noexcept {
         typedef typename PERIOD_CONTAINER_TYPE::value_type period_type;
         if (periods.size() <= 1) return;
         if (!std::is_sorted(
@@ -1544,7 +1535,7 @@ namespace ztime {
      * \return Указатель на элемент отсортированного контейнера с периодами или на конец контейнера, если период не найден
      */
     template<class PERIOD_CONTAINER_TYPE, class TIMESTAMP_TYPE>
-    constexpr inline auto find_period(PERIOD_CONTAINER_TYPE &periods, const TIMESTAMP_TYPE timestamp) noexcept {
+    ZTIME_CONSTEXPR inline typename PERIOD_CONTAINER_TYPE::iterator find_period(PERIOD_CONTAINER_TYPE &periods, const TIMESTAMP_TYPE timestamp) noexcept {
         typedef typename PERIOD_CONTAINER_TYPE::value_type period_type;
         if (periods.empty()) return periods.end();
         auto it = std::lower_bound(

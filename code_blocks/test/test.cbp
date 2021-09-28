@@ -7,7 +7,7 @@
 		<Option compiler="mingw_64_7_3_0" />
 		<Build>
 			<Target title="moon_phase">
-				<Option output="bin/Release/moon_phase" prefix_auto="1" extension_auto="1" />
+				<Option output="moon_phase" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="mingw_64_7_3_0" />
@@ -21,7 +21,7 @@
 				</Linker>
 			</Target>
 			<Target title="julian_date">
-				<Option output="bin/Release/moon_phase" prefix_auto="1" extension_auto="1" />
+				<Option output="julian_date" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="mingw_64_7_3_0" />
@@ -35,12 +35,42 @@
 				</Linker>
 			</Target>
 			<Target title="parse">
-				<Option output="bin/Release/moon_phase" prefix_auto="1" extension_auto="1" />
+				<Option output="parse" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="mingw_64_7_3_0" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="../../src" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add directory="../../src" />
+				</Linker>
+			</Target>
+			<Target title="ntp">
+				<Option output="ntp" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="mingw_64_7_3_0" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="../../src" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="ws2_32" />
+					<Add directory="../../src" />
+				</Linker>
+			</Target>
+			<Target title="pc_time">
+				<Option output="julian_date" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="mingw_64_7_3_0" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++14" />
 					<Add directory="../../src" />
 				</Compiler>
 				<Linker>
@@ -56,14 +86,23 @@
 		<Unit filename="../../src/ztime.cpp" />
 		<Unit filename="../../src/ztime.hpp" />
 		<Unit filename="../../src/ztime_cpu_time.hpp" />
+		<Unit filename="../../src/ztime_ntp.hpp">
+			<Option target="ntp" />
+		</Unit>
 		<Unit filename="julian_date.cpp">
 			<Option target="julian_date" />
 		</Unit>
 		<Unit filename="moon_phase.cpp">
 			<Option target="moon_phase" />
 		</Unit>
+		<Unit filename="ntp.cpp">
+			<Option target="ntp" />
+		</Unit>
 		<Unit filename="parse.cpp">
 			<Option target="parse" />
+		</Unit>
+		<Unit filename="pc_time.cpp">
+			<Option target="pc_time" />
 		</Unit>
 		<Extensions />
 	</Project>
