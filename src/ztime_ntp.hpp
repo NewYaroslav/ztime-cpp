@@ -346,6 +346,9 @@ namespace ztime {
         std::deque<NtpClient>   clients;
         std::deque<int64_t>     time_measurements;
         std::atomic<uint64_t>   next_timestamp = ATOMIC_VAR_INIT(0);
+        std::atomic<uint64_t>   last_timestamp_us = ATOMIC_VAR_INIT(0);
+        std::atomic<uint64_t>   last_timestamp_ms = ATOMIC_VAR_INIT(0);
+        std::atomic<uint64_t>   last_timestamp = ATOMIC_VAR_INIT(0);
         std::atomic<int64_t>    offset_us = ATOMIC_VAR_INIT(0);
         std::atomic<bool>       is_init = ATOMIC_VAR_INIT(false);
 
@@ -739,6 +742,59 @@ namespace ztime {
         inline const double get_ftimestamp() noexcept {
             return (double)get_timestamp_us() / 1000000.0d;
         }
+
+        /** \brief Получить метку времени в микросекундах
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени в микросекундах
+         */
+        inline const uint64_t get_steady_timestamp_us() noexcept {
+            const uint64_t t = get_timestamp_us();
+            if (is_init) {
+                if (last_timestamp_us == 0) last_timestamp_us = t;
+                const uint64_t st = std::min(t, (uint64_t)last_timestamp_us);
+                last_timestamp_us = t;
+                return st;
+            }
+            return t;
+        }
+
+        /** \brief Получить метку времени в миллисекундах
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени в миллисекундах
+         */
+        inline const uint64_t get_steady_timestamp_ms() noexcept {
+            const uint64_t t = get_timestamp_ms();
+            if (is_init) {
+                if (last_timestamp_ms == 0) last_timestamp_ms = t;
+                const uint64_t st = std::min(t, (uint64_t)last_timestamp_ms);
+                last_timestamp_ms = t;
+                return st;
+            }
+            return t;
+        }
+
+        /** \brief Получить метку времени
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени
+         */
+        inline const uint64_t get_steady_timestamp() noexcept {
+            const uint64_t t = get_timestamp();
+            if (is_init) {
+                if (last_timestamp == 0) last_timestamp = t;
+                const uint64_t st = std::min(t, (uint64_t)last_timestamp);
+                last_timestamp = t;
+                return st;
+            }
+            return t;
+        }
+
+        /** \brief Получить метку времени в виде числа с плавающей запятой
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени
+         */
+        inline const double get_steady_ftimestamp() noexcept {
+            return (double)get_steady_timestamp_us() / 1000000.0d;
+        }
     }; // NtpClientPool
 
     class ntp {
@@ -885,6 +941,38 @@ namespace ztime {
          */
         inline static const double get_ftimestamp() noexcept {
             return ntp_measurer.client_pool.get_ftimestamp();
+        }
+
+        /** \brief Получить метку времени в микросекундах
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени в микросекундах
+         */
+        inline static const uint64_t get_steady_timestamp_us() noexcept {
+            return ntp_measurer.client_pool.get_steady_timestamp_us();
+        }
+
+        /** \brief Получить метку времени в миллисекундах
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени в миллисекундах
+         */
+        inline static const uint64_t get_steady_timestamp_ms() noexcept {
+            return ntp_measurer.client_pool.get_steady_timestamp_ms();
+        }
+
+        /** \brief Получить метку времени
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени
+         */
+        inline static const uint64_t get_steady_timestamp() noexcept {
+            return ntp_measurer.client_pool.get_steady_timestamp();
+        }
+
+        /** \brief Получить метку времени в виде числа с плавающей запятой
+         * Данный метод возвращает время, которое не может уменьшаться
+         * \return Метка времени
+         */
+        inline static const double get_steady_ftimestamp() noexcept {
+            return ntp_measurer.client_pool.get_steady_ftimestamp();
         }
     }; // ntp
 }; // ztime

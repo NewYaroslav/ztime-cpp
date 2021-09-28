@@ -6,10 +6,20 @@
 int main() {
     std::cout << "test Ntp" << std::endl;
     ztime::ntp::init();
-    std::cout << "-ntp timestamp_us " << ztime::ntp::get_timestamp_us() << std::endl;
-    std::cout << "-ntp timestamp    " << ztime::ntp::get_timestamp() << std::endl;
-    std::cout << "-ntp offset_us    " << ztime::ntp::get_offset_us() << std::endl;
-    std::cout << "-pc  timestamp_us " << ztime::get_timestamp_us() << std::endl;
+    std::cout << "-ntp steady timestamp us  " << ztime::ntp::get_steady_timestamp_us() << std::endl;
+    std::cout << "-ntp timestamp us         " << ztime::ntp::get_timestamp_us() << std::endl;
+    std::cout << "-ntp timestamp            " << ztime::ntp::get_timestamp() << std::endl;
+    std::cout << "-ntp offset us            " << ztime::ntp::get_offset_us() << std::endl;
+    std::cout << "-pc  timestamp us         " << ztime::get_timestamp_us() << std::endl;
+
+    {
+        size_t index = 0;
+        while (index < 100) {
+            std::cout << "-ntp steady timestamp us  " << ztime::ntp::get_steady_timestamp_us() << std::endl;
+            ++index;
+            ztime::delay_ms(1000);
+        }
+    }
 
     // проверяем NTP клиент
     std::cout << "test NtpClient" << std::endl;
@@ -30,10 +40,10 @@ int main() {
                 continue;
             }
             client.make_measurement();
-            std::cout << "-ntp timestamp_us " << client.get_timestamp_us() << std::endl;
+            std::cout << "-ntp timestamp us " << client.get_timestamp_us() << std::endl;
             std::cout << "-ntp timestamp    " << client.get_timestamp() << std::endl;
-            std::cout << "-ntp offset_us    " << client.get_offset_us() << std::endl;
-            std::cout << "-pc  timestamp_us " << ztime::get_timestamp_us() << std::endl;
+            std::cout << "-ntp offset us    " << client.get_offset_us() << std::endl;
+            std::cout << "-pc  timestamp us " << ztime::get_timestamp_us() << std::endl;
             ++index;
         }
     }
@@ -49,11 +59,13 @@ int main() {
             }
             client_poll.make_measurement();
             std::cout << "-ntp timestamp_us " << client_poll.get_timestamp_us() << std::endl;
+            std::cout << "-ntp timestamp us " << client_poll.get_steady_timestamp_us() << std::endl;
             std::cout << "-ntp timestamp    " << client_poll.get_timestamp() << std::endl;
             std::cout << "-ntp offset_us    " << client_poll.get_offset_us() << std::endl;
             std::cout << "-pc  timestamp_us " << ztime::get_timestamp_us() << std::endl;
             ++index;
         }
     }
+
     return 0;
 }
