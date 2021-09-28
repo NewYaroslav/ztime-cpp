@@ -120,12 +120,7 @@ namespace ztime {
             std::memset(&packet, 0, sizeof(ntp_packet));
             packet.li_vn_mode = (leap_indicator << 6) + (version_number << 3) + mode;
 
-            struct timespec ts;
-#           if defined(CLOCK_REALTIME)
-            clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#           else
-            timespec_get(&ts, TIME_UTC);
-#           endif
+            const struct timespec ts = get_timespec();
 
             // В Transmit необходимо указать текущее время на локальной машине (количество секунд с 1 января 1900 г)
             packet.txTm_s = ts.tv_sec + config.ntp_timestamp_delta;
@@ -138,12 +133,7 @@ namespace ztime {
         /** \brief Распаковать пакет данных
          */
         inline void unpack(ntp_packet &packet) noexcept {
-            struct timespec ts;
-#           if defined(CLOCK_REALTIME)
-            clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#           else
-            timespec_get(&ts, TIME_UTC);
-#           endif
+            const struct timespec ts = get_timespec();
 
             packet.txTm_s = ntohl(packet.txTm_s);
             packet.txTm_f = ntohl(packet.txTm_f);
@@ -661,7 +651,7 @@ namespace ztime {
         }
 
         /** \brief Сделать замер времени
-         * \return
+         * \return Вернет true в случае успешного замера
          */
         inline bool make_measurement() noexcept {
             std::lock_guard<std::mutex> lock(make_measurement_mutex);
@@ -798,10 +788,10 @@ namespace ztime {
                         client_pool_future.get();
                     }
                     catch(const std::exception &e) {
-                        std::cerr << "NtpMeasurer error: ~NtpMeasurer(), what: " << e.what() << std::endl;
+                        //std::cerr << "NtpMeasurer error: ~NtpMeasurer(), what: " << e.what() << std::endl;
                     }
                     catch(...) {
-                        std::cerr << "NtpMeasurer error: ~NtpMeasurer()" << std::endl;
+                        //std::cerr << "NtpMeasurer error: ~NtpMeasurer()" << std::endl;
                     }
                 }
             }

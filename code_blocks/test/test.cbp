@@ -54,11 +54,14 @@
 				<Option type="1" />
 				<Option compiler="mingw_64_7_3_0" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-std=gnu++14" />
+					<Add option="-pg" />
+					<Add option="-Og" />
+					<Add option="-g" />
 					<Add directory="../../src" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
+					<Add option="-pg -lgmon" />
 					<Add library="ws2_32" />
 					<Add directory="../../src" />
 				</Linker>

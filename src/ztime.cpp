@@ -25,11 +25,6 @@
 #include "ztime.hpp"
 
 #include <ctime>
-#include <time.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/timeb.h>
-
 #include <thread>
 #include <vector>
 #include <algorithm>
@@ -37,74 +32,49 @@
 
 namespace ztime {
 
-    const timestamp_t get_timestamp() noexcept {
+    inline const struct timespec get_timespec() noexcept {
         // https://en.cppreference.com/w/c/chrono/timespec_get
         struct timespec ts;
-#       if defined(CLOCK_REALTIME)
+#           if defined(CLOCK_REALTIME)
         clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
+#           else
         timespec_get(&ts, TIME_UTC);
-#       endif
+#           endif
+        return ts;
+    }
+
+    const timestamp_t get_timestamp() noexcept {
+        const struct timespec ts = get_timespec();
         return ts.tv_sec;
     }
 
     const timestamp_t get_timestamp_ms() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return MILLISECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000000;
     }
 
     const timestamp_t get_timestamp_us() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return MICROSECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000;
     }
 
     const ftimestamp_t get_ftimestamp() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return (ftimestamp_t)ts.tv_sec + (ftimestamp_t)ts.tv_nsec / 1000000000.0d;
     }
 
     const uint32_t get_millisecond() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return ts.tv_nsec / 1000000;
     }
 
     const uint32_t get_microsecond() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return ts.tv_nsec / 1000;
     }
 
     const uint32_t get_nanosecond() noexcept {
-        struct timespec ts;
-#       if defined(CLOCK_REALTIME)
-        clock_gettime(CLOCK_REALTIME, &ts); // Версия для POSIX
-#       else
-        timespec_get(&ts, TIME_UTC);
-#       endif
+        const struct timespec ts = get_timespec();
         return ts.tv_nsec;
     }
 
