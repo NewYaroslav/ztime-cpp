@@ -354,10 +354,10 @@ namespace ztime {
 
         class Config {
         public:
-            std::deque<std::string> hosts;
-            int delay_measurements  = 64;
-            int stop_measurements   = 30;
-            int max_measurements    = 1000;
+            std::deque<std::string> hosts;  /**< Список хостов */
+            int delay_measurements  = 64;   /**< Период опроса пула */
+            int stop_measurements   = 10;   /**< Количество запросов для остановки */
+            int max_measurements    = 100;  /**< Максимальное количество измерений для медианного фильтра */
             bool is_hosts_shuffle       = true;
         } config;
 
@@ -534,7 +534,6 @@ namespace ztime {
                 // Sundsvall:
                 "svl1.ntp.se",
                 "svl2.ntp.se",
-
                 // Internet Systems Consortium
                 "clock.isc.org",
                 // NTP Pool
@@ -582,6 +581,10 @@ namespace ztime {
                 "1.debian.pool.ntp.org",
                 "2.debian.pool.ntp.org",
                 "3.debian.pool.ntp.org",
+                "0.ubuntu.pool.ntp.org",
+                "1.ubuntu.pool.ntp.org",
+                "2.ubuntu.pool.ntp.org",
+                "3.ubuntu.pool.ntp.org",
                 "0.askozia.pool.ntp.org",
                 "1.askozia.pool.ntp.org",
                 "2.askozia.pool.ntp.org",
@@ -751,9 +754,8 @@ namespace ztime {
             const uint64_t t = get_timestamp_us();
             if (is_init) {
                 if (last_timestamp_us == 0) last_timestamp_us = t;
-                const uint64_t st = std::min(t, (uint64_t)last_timestamp_us);
-                last_timestamp_us = t;
-                return st;
+                last_timestamp_us = std::max(t, (uint64_t)last_timestamp_us);
+                return last_timestamp_us;
             }
             return t;
         }
@@ -766,9 +768,8 @@ namespace ztime {
             const uint64_t t = get_timestamp_ms();
             if (is_init) {
                 if (last_timestamp_ms == 0) last_timestamp_ms = t;
-                const uint64_t st = std::min(t, (uint64_t)last_timestamp_ms);
-                last_timestamp_ms = t;
-                return st;
+                last_timestamp_ms = std::max(t, (uint64_t)last_timestamp_ms);
+                return last_timestamp_ms;
             }
             return t;
         }
@@ -781,9 +782,8 @@ namespace ztime {
             const uint64_t t = get_timestamp();
             if (is_init) {
                 if (last_timestamp == 0) last_timestamp = t;
-                const uint64_t st = std::min(t, (uint64_t)last_timestamp);
-                last_timestamp = t;
-                return st;
+                last_timestamp = std::min(t, (uint64_t)last_timestamp);
+                return last_timestamp;
             }
             return t;
         }
@@ -854,14 +854,18 @@ namespace ztime {
         };
 
         static inline NtpMeasurer ntp_measurer;
+        static inline std::mutex ntp_measurer_init_mutex;
 
     public:
 
         /** \brief Инициализировать NTP
          * \param use_async Использовать асинхронные замеры
-         * \return Вернет true в случае успешной инициализации
+         * \return Вернет true в случае успешной инициализации или есть NTP уже инициализировано
          */
-        inline static bool init(const bool use_async = true) {
+        inline static bool init(const std::deque<std::string> &hosts = {}, const bool use_async = true) {
+            std::lock_guard<std::mutex> lock(ntp_measurer_init_mutex);
+            if (ntp_measurer.is_init) return true;
+            if (!hosts.empty()) ntp_measurer.client_pool.set_hosts(hosts);
             ntp_measurer.init(use_async);
             while (!ntp_measurer.is_once && !ntp_measurer.is_shutdown) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -904,6 +908,9 @@ namespace ztime {
             ntp_measurer.client_pool.set_hosts_shuffle(value);
         }
 
+        /** \brief Установить список хостов
+         * \param hosts Список хостов
+         */
         inline static void set_hosts(const std::deque<std::string> &hosts) noexcept {
             ntp_measurer.client_pool.set_hosts(hosts);
         }

@@ -5,7 +5,8 @@
 
 int main() {
     std::cout << "test Ntp" << std::endl;
-    ztime::ntp::init();
+    std::cout << "ztime::ntp::init return " << ztime::ntp::init() << std::endl;
+    std::cout << "ztime::ntp::init return " << ztime::ntp::init() << std::endl;
     std::cout << "-ntp steady timestamp us  " << ztime::ntp::get_steady_timestamp_us() << std::endl;
     std::cout << "-ntp timestamp us         " << ztime::ntp::get_timestamp_us() << std::endl;
     std::cout << "-ntp timestamp            " << ztime::ntp::get_timestamp() << std::endl;
@@ -21,6 +22,7 @@ int main() {
         }
     }
 
+
     // проверяем NTP клиент
     std::cout << "test NtpClient" << std::endl;
     {
@@ -32,6 +34,7 @@ int main() {
             std::cout << "ntp offset " << offset << std::endl;
         };
         client.set_host("us.pool.ntp.org");
+        //client.set_host("ntp1.vniiftri.ru");
 
         size_t index = 0;
         while (index < 2) {
