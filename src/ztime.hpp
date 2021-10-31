@@ -316,7 +316,7 @@ namespace ztime {
 	/** \brief Получить дату автоматизации OLE
 	 * \return Дата автоматизации OLE
 	 */
-	inline oadate_t get_oadate() noexcept {
+	ZTIME_CONSTEXPR inline oadate_t get_oadate() noexcept {
 		return convert_ftimestamp_to_oadate(get_ftimestamp());
 	}
 
@@ -1069,7 +1069,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени начала года
 	 */
-	inline timestamp_t get_first_timestamp_year(const timestamp_t timestamp) noexcept {
+	ZTIME_CONSTEXPR inline timestamp_t get_first_timestamp_year(const timestamp_t timestamp) noexcept {
 		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
 		if(t < SECONDS_IN_YEAR) return timestamp - t;
 		else if(t < (2*SECONDS_IN_YEAR)) return timestamp + SECONDS_IN_YEAR - t;
@@ -1083,7 +1083,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени конца года
 	 */
-	inline timestamp_t get_last_timestamp_year(const timestamp_t timestamp = get_timestamp()) noexcept {
+	ZTIME_CONSTEXPR inline timestamp_t get_last_timestamp_year(const timestamp_t timestamp = get_timestamp()) noexcept {
 		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
 		if(t < SECONDS_IN_YEAR) return timestamp + SECONDS_IN_YEAR - t - 1;
 		else if(t < (2*SECONDS_IN_YEAR)) return timestamp + (2*SECONDS_IN_YEAR) - t - 1;
@@ -1098,7 +1098,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в начале дня
 	 */
-	inline timestamp_t get_first_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_first_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_DAY);
 	}
 
@@ -1107,7 +1107,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в конце дня
 	 */
-	inline timestamp_t get_last_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_last_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_DAY) + SECONDS_IN_DAY - 1;
 	}
 
@@ -1116,7 +1116,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в начале часа
 	 */
-	inline timestamp_t get_first_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_first_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_HOUR);
 	}
 
@@ -1125,7 +1125,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в конце часа
 	 */
-	inline timestamp_t get_last_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_last_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_HOUR) + SECONDS_IN_HOUR - 1;
 	}
 
@@ -1134,7 +1134,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в начале минуты
 	 */
-	inline timestamp_t get_first_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_first_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_MINUTE);
 	}
 
@@ -1143,7 +1143,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в конце минуты
 	 */
-	inline timestamp_t get_last_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_last_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return timestamp - (timestamp % SECONDS_IN_MINUTE) + SECONDS_IN_MINUTE - 1;
 	}
 
@@ -1153,7 +1153,7 @@ namespace ztime {
 	 * \param timestamp Метка времени
 	 * \return Метка времени в начале периода
 	 */
-	inline timestamp_t get_first_timestamp_period(const uint32_t period, const timestamp_t timestamp  = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_first_timestamp_period(const uint32_t period, const timestamp_t timestamp  = get_timestamp()) noexcept {
 		return timestamp - (timestamp % period);
 	}
 
@@ -1163,7 +1163,7 @@ namespace ztime {
 	 * \param timestamp		Метка времени
 	 * \return Метка времени в конце периода
 	 */
-	inline timestamp_t get_last_timestamp_period(const uint32_t period, const timestamp_t timestamp	 = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_last_timestamp_period(const uint32_t period, const timestamp_t timestamp	 = get_timestamp()) noexcept {
 		return timestamp - (timestamp % period) + period - 1;
 	}
 
@@ -1171,7 +1171,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return вернет true если выходной день
 	 */
-	inline bool is_day_off(const timestamp_t timestamp = get_timestamp()) noexcept {
+	ZTIME_CONSTEXPR inline bool is_day_off(const timestamp_t timestamp = get_timestamp()) noexcept {
 		uint32_t wday = get_weekday(timestamp);
 		if(wday == ztime::SUN || wday == ztime::SAT) return true;
 		return false;
@@ -1181,7 +1181,7 @@ namespace ztime {
 	 * \param day день с начала отсчета Unix-времени
 	 * \return вернет true если выходной день
 	 */
-	inline bool is_day_off_for_day(const uint32_t day) noexcept {
+	ZTIME_CONSTEXPR inline bool is_day_off_for_day(const uint32_t day) noexcept {
 		uint32_t wday = (day + THU) % DAYS_IN_WEEK;
 		if(wday == ztime::SUN || wday == ztime::SAT) return true;
 		return false;
@@ -1191,10 +1191,8 @@ namespace ztime {
 	 * \param year	Год
 	 * \return вернет true, если год високосный
 	 */
-	inline bool is_leap_year(const uint32_t year) noexcept {
-		//if((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) return true;
-		if ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0)) return true;
-		return false;
+	constexpr inline bool is_leap_year(const uint32_t year) noexcept {
+		return ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0));
 	}
 
 	/** \brief Проверить корректность дня месяца
@@ -1233,7 +1231,7 @@ namespace ztime {
 	 * \param timestamp Метка времени
 	 * \return Минута с начала UNIX
 	 */
-	inline uint64_t get_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint64_t get_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint64_t)(timestamp / SECONDS_IN_MINUTE);
 	}
 
@@ -1243,7 +1241,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return минута дня
 	 */
-	inline uint32_t get_minute_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_minute_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)((timestamp / SECONDS_IN_MINUTE) % MINUTES_IN_DAY);
 	}
 
@@ -1253,7 +1251,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return Минута часа
 	 */
-	inline uint32_t get_minute_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_minute_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)((timestamp / SECONDS_IN_MINUTE) % MINUTES_IN_HOUR);
 	}
 
@@ -1262,7 +1260,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return час дня
 	 */
-	inline uint32_t get_hour_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_hour_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)((timestamp / SECONDS_IN_HOUR) % HOURS_IN_DAY);
 	}
 
@@ -1271,7 +1269,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return секунда минуты
 	 */
-	inline uint32_t get_second_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_second_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)(timestamp % SECONDS_IN_MINUTE);
 	}
 
@@ -1280,7 +1278,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return секунда часа
 	 */
-	inline uint32_t get_second_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_second_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)(timestamp % SECONDS_IN_HOUR);
 	}
 
@@ -1289,7 +1287,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return Секунда дня
 	 */
-	inline uint32_t get_second_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_second_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)(timestamp % SECONDS_IN_DAY);
 	}
 
@@ -1300,7 +1298,7 @@ namespace ztime {
 	 * \param second	Секунд
 	 * \return Секунда дня
 	 */
-	inline uint32_t get_second_day(const uint32_t hour, const uint32_t minute, const uint32_t second) noexcept {
+	constexpr inline uint32_t get_second_day(const uint32_t hour, const uint32_t minute, const uint32_t second) noexcept {
 		return hour * SECONDS_IN_HOUR + minute * SECONDS_IN_MINUTE + second;
 	}
 
@@ -1309,7 +1307,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return день с начала UNIX времени
 	 */
-	inline uint32_t get_day(const timestamp_t timestamp = get_timestamp()) noexcept {
+	constexpr inline uint32_t get_day(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return (uint32_t)(timestamp / SECONDS_IN_DAY);
 	}
 
@@ -1317,7 +1315,7 @@ namespace ztime {
 	 * \param year год
 	 * \return метка времени начала года
 	 */
-	inline timestamp_t get_timestamp_beg_year(const uint32_t year) noexcept {
+	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_beg_year(const uint32_t year) noexcept {
 		uint32_t diff = (year - FIRST_YEAR_UNIX);
 		timestamp_t t = (diff / 4) * SECONDS_IN_4_YEAR;
 		uint32_t temp = diff % 4;
@@ -1331,7 +1329,7 @@ namespace ztime {
 	 * \param unix_day день с начала UNIX-времени
 	 * \return метка времени начала дня с момента начала UNIX-времени
 	 */
-	inline timestamp_t get_timestamp_day(const uint32_t unix_day) noexcept {
+	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_day(const uint32_t unix_day) noexcept {
 		return (timestamp_t)unix_day * SECONDS_IN_DAY;
 	}
 
@@ -1340,7 +1338,7 @@ namespace ztime {
 	 * \param timestamp метка времени
 	 * \return год UNIX времени
 	 */
-	inline uint32_t get_year(const timestamp_t timestamp = get_timestamp()) noexcept {
+	ZTIME_CONSTEXPR inline uint32_t get_year(const timestamp_t timestamp = get_timestamp()) noexcept {
 		uint32_t year = FIRST_YEAR_UNIX + 4 * (timestamp / SECONDS_IN_4_YEAR);
 		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
 		if(t < SECONDS_IN_YEAR) return year;
