@@ -316,7 +316,7 @@ namespace ztime {
 	/** \brief Получить дату автоматизации OLE
 	 * \return Дата автоматизации OLE
 	 */
-	ZTIME_CONSTEXPR inline oadate_t get_oadate() noexcept {
+	inline oadate_t get_oadate() noexcept {
 		return convert_ftimestamp_to_oadate(get_ftimestamp());
 	}
 

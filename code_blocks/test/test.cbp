@@ -73,7 +73,7 @@
 				<Option compiler="mingw_64_7_3_0" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-std=c++14" />
+					<Add option="-std=gnu++11" />
 					<Add directory="../../src" />
 				</Compiler>
 				<Linker>
