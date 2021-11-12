@@ -482,7 +482,15 @@ namespace ztime {
 				} else {
 					return false;
 				}
-			}
+			} else
+			if (output_list.size() == 3 &&
+				output_list[0].size() == 2 &&
+				output_list[1].size() == 3 &&
+				output_list[2].size() == 2) {
+				day = std::stoi(output_list[0]);
+                month = get_month(output_list[1]);
+                year = 2000 + std::stoi(output_list[2]);
+            }
 		} else {
 			return false;
 		}
@@ -583,7 +591,15 @@ namespace ztime {
 						return 0;
 					}
 				}
-			}
+			} else
+			if (arguments.size() == 3 &&
+				arguments[0].size() == 2 &&
+				arguments[1].size() == 3 &&
+				arguments[2].size() == 2) {
+				day = std::stoi(arguments[0]);
+                month = get_month(arguments[1]);
+                year = 2000 + std::stoi(arguments[2]);
+            }
 		} else {
 			return 0;
 		}

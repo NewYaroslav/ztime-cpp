@@ -294,7 +294,7 @@ cout << "to_string " << ztime::to_string("%hh:%mm.%sss",ztime::get_ftimestamp(31
 Функции *convert_str_to_timestamp, to_timestamp, to_second_day* подерживают следующий список разделителей чисел (/\_:-.,<пробел>) 
 
 Функции *convert_str_to_timestamp, to_timestamp* способны распрасить время и дату и поддерживает следующие форматы времени:
-
+	- DD MM YY Пример: 29 Aug 19
 	- HH:MM:SS DD MM YY Пример: 20:25:00, 29 Aug 19
 	- HH:MM:SS DD MM YY Пример: 20:25:00, 29 Aug 2019
 	- HH:MM:SS DD.MM.YYYY Пример: 00:59:59 30.08.2019

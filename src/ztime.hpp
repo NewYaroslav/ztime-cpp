@@ -893,9 +893,9 @@ namespace ztime {
 	 * YYYY.MM.DD hh:mm:ss Пример: 2013.02.25 18:25:10
 	 * YYYY.MM.DD Пример: 2013.02.25
 	 * DD.MM.YYYY Пример: 21.09.2018
-	 * \param str время в формате строки, например
-	 * \param t метка времени
-	 * \return вернет true если преобразование завершилось успешно
+	 * \param str   Время в формате строки, например
+	 * \param t     Метка времени
+	 * \return Вернет true если преобразование завершилось успешно
 	 */
 	bool convert_str_to_timestamp(std::string str, timestamp_t& t);
 
