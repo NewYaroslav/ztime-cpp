@@ -81,6 +81,21 @@
 					<Add directory="../../src" />
 				</Linker>
 			</Target>
+			<Target title="timer_event">
+				<Option output="timer_event" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="mingw_64_7_3_0" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=gnu++11" />
+					<Add directory="../../src" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add directory="../../src" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -91,6 +106,9 @@
 		<Unit filename="../../src/ztime_cpu_time.hpp" />
 		<Unit filename="../../src/ztime_ntp.hpp">
 			<Option target="ntp" />
+		</Unit>
+		<Unit filename="../../src/ztime_timer_event.hpp">
+			<Option target="timer_event" />
 		</Unit>
 		<Unit filename="julian_date.cpp">
 			<Option target="julian_date" />
@@ -106,6 +124,9 @@
 		</Unit>
 		<Unit filename="pc_time.cpp">
 			<Option target="pc_time" />
+		</Unit>
+		<Unit filename="timer_event.cpp">
+			<Option target="timer_event" />
 		</Unit>
 		<Extensions />
 	</Project>

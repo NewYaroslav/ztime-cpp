@@ -6,6 +6,11 @@ using namespace std;
 int main() {
     ztime::timestamp_t timestamp = 0;
 
+    std::cout << "test #0" << std::endl;
+    ztime::convert_str_to_timestamp("   22:24:52, 18.12.20", timestamp);
+    std::cout << "convert 22:24:52, 18.12.20 == " << ztime::get_str_date_time(timestamp) << std::endl;
+    std::cout << "convert 22:24:52, 18.12.20 == " << ztime::get_str_date_time(ztime::to_timestamp("  22:24:52, 18.12.20")) << std::endl;
+
     std::cout << "test #1" << std::endl;
     ztime::convert_str_to_timestamp("08.08.2021 23:59:59", timestamp);
     std::cout << "convert 08.08.2021 23:59:59 == " << ztime::get_str_date_time(timestamp) << std::endl;
