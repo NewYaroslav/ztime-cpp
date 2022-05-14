@@ -29,6 +29,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <locale>
 
 namespace ztime {
 
@@ -406,7 +407,9 @@ namespace ztime {
 
 	uint32_t get_month(std::string month) {
 		if(month.size() == 0) return 0;
-		std::transform(month.begin(), month.end(), month.begin(), tolower);
+		std::transform(month.begin(), month.end(), month.begin(), [](char ch) {
+            return std::use_facet<std::ctype<char>>(std::locale()).tolower(ch);
+        });
 		month[0] = toupper(month[0]);
 		for(uint32_t i = 0; i < MONTHS_IN_YEAR; ++i) {
 			std::string name_long = month_name_long[i];
