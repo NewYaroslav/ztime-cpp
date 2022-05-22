@@ -782,7 +782,7 @@ namespace ztime {
 			const uint64_t t = get_timestamp();
 			if (is_init) {
 				if (last_timestamp == 0) last_timestamp = t;
-				last_timestamp = std::min(t, (uint64_t)last_timestamp);
+				last_timestamp = std::max(t, (uint64_t)last_timestamp);
 				return last_timestamp;
 			}
 			return t;
