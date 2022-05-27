@@ -355,8 +355,8 @@ namespace ztime {
 		class Config {
 		public:
 			std::deque<std::string> hosts;	/**< Список хостов */
-			int delay_measurements	= 64;	/**< Период опроса пула */
-			int stop_measurements	= 10;	/**< Количество запросов для остановки */
+			int delay_measurements	= 1024;	/**< Период опроса пула */
+			int stop_measurements	= 3;	/**< Количество запросов для остановки */
 			int max_measurements	= 100;	/**< Максимальное количество измерений для медианного фильтра */
 			bool is_hosts_shuffle		= true;
 		} config;
@@ -827,7 +827,7 @@ namespace ztime {
 						while (!is_shutdown) {
 							is_init = client_pool.make_measurement();
 							is_once = true;
-							std::this_thread::sleep_for(std::chrono::milliseconds(100));
+							std::this_thread::sleep_for(std::chrono::milliseconds(10));
 						}
 					});
 				} else {
@@ -867,7 +867,10 @@ namespace ztime {
 			if (ntp_measurer.is_init) return true;
 			if (!hosts.empty()) ntp_measurer.client_pool.set_hosts(hosts);
 			ntp_measurer.init(use_async);
-			while (!ntp_measurer.is_once && !ntp_measurer.is_shutdown) {
+			const int max_tick = 5000;
+			int tick = 0;
+			while (!ntp_measurer.is_once && !ntp_measurer.is_shutdown && tick < max_tick) {
+				++tick;
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 			return ntp_measurer.is_init;
