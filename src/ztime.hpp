@@ -1316,13 +1316,13 @@ namespace ztime {
 	 * \return метка времени начала года
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_beg_year(const uint32_t year) noexcept {
-		uint32_t diff = (year - FIRST_YEAR_UNIX);
-		timestamp_t t = (diff / 4) * SECONDS_IN_4_YEAR;
-		uint32_t temp = diff % 4;
-		if(temp == 0) return t;
-		else if(temp == 1) return t + SECONDS_IN_YEAR;
-		else if(temp == 2) return t + (2*SECONDS_IN_YEAR);
-		return t + (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR);
+		const uint64_t diff = (uint64_t)(year - FIRST_YEAR_UNIX);
+        const uint64_t t = (diff / 4ULL) * (uint64_t)SECONDS_IN_4_YEAR;
+        const uint64_t temp = diff % 4ULL;
+        if (temp == 0) return t;
+        else if (temp == 1) return t + (uint64_t)SECONDS_IN_YEAR;
+        else if (temp == 2) return t + (2ULL * (uint64_t)SECONDS_IN_YEAR);
+        return t + (2ULL * (uint64_t)SECONDS_IN_YEAR + (uint64_t)SECONDS_IN_LEAP_YEAR);
 	}
 
 	 /** \brief Получить метку времени дня UINX-времени
