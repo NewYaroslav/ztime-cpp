@@ -29,6 +29,10 @@ int main() {
     std::cout << "convert 28 Oct 21 == " << ztime::get_str_date_time(ztime::to_timestamp(" 28 Oct 21")) << std::endl;
 
     std::cout << "test #4" << std::endl;
+    std::cout << "convert 2022.02.01	00:09:21.238 == " << ztime::get_str_date_time_ms((double)ztime::to_timestamp_ms("2022.02.01	00:09:21.238")/1000.0) << std::endl;
+    std::cout << "convert 2022.02.01	00:09:21.238 == " << ztime::get_str_date_time_ms((double)ztime::to_timestamp("2022.02.01	00:09:21.238")) << std::endl;
+
+    std::cout << "test #5" << std::endl;
     timestamp = 0;
     ztime::convert_str_to_timestamp("06:45:11", timestamp);
     std::cout << "convert 06:45:11 == " << ztime::get_str_date_time(timestamp) << std::endl;

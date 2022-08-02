@@ -827,18 +827,35 @@ namespace ztime {
 	/** \brief Преобразовать строку с датой в timestamp
 	 *
 	 * Данная функция поддерживает форматы времени:
-	 * HH:MM:SS DD MM YY Пример: 20:25:00, 29 Aug 19
-	 * HH:MM:SS DD MM YY Пример: 20:25:00, 29 Aug 2019
-	 * HH:MM:SS DD.MM.YYYY Пример: 00:59:59 30.08.2019
-	 * HH:MM:SS DD-MM-YYYY Пример: 00:59:59 30-08-2019
-	 * YYYY-MM-DD hh:mm:ss Пример: 2013-02-25 18:25:10
-	 * YYYY.MM.DD hh:mm:ss Пример: 2013.02.25 18:25:10
-	 * YYYY.MM.DD Пример: 2013.02.25
-	 * DD.MM.YYYY Пример: 21.09.2018
+	 * HH:MM:SS DD MM YY	Пример: 20:25:00, 29 Aug 19
+	 * HH:MM:SS DD MM YY	Пример: 20:25:00, 29 Aug 2019
+	 * HH:MM:SS DD.MM.YYYY	Пример: 00:59:59 30.08.2019
+	 * HH:MM:SS DD-MM-YYYY	Пример: 00:59:59 30-08-2019
+	 * YYYY-MM-DD hh:mm:ss	Пример: 2013-02-25 18:25:10
+	 * YYYY.MM.DD hh:mm:ss	Пример: 2013.02.25 18:25:10
+	 * YYYY.MM.DD			Пример: 2013.02.25
+	 * DD.MM.YYYY			Пример: 21.09.2018
 	 * \param str_datetime	Время в формате строки
 	 * \return Вернет метку времени, если преобразование завершилось успешно, или 0 в случае провала
 	 */
 	ztime::timestamp_t to_timestamp(std::string str_datetime);
+
+	/** \brief Преобразовать строку с датой в timestamp с разрешением до миллисекунд
+	 *
+	 * Данная функция поддерживает форматы времени:
+	 * HH:MM:SS DD MM YY		Пример: 20:25:00, 29 Aug 19
+	 * HH:MM:SS DD MM YY		Пример: 20:25:00, 29 Aug 2019
+	 * HH:MM:SS DD.MM.YYYY		Пример: 00:59:59 30.08.2019
+	 * HH:MM:SS DD-MM-YYYY		Пример: 00:59:59 30-08-2019
+	 * YYYY-MM-DD hh:mm:ss.mmm	Пример: 2013-02-25 00:09:21.238
+	 * YYYY-MM-DD hh:mm:ss		Пример: 2013-02-25 18:25:10
+	 * YYYY.MM.DD hh:mm:ss		Пример: 2013.02.25 18:25:10
+	 * YYYY.MM.DD				Пример: 2013.02.25
+	 * DD.MM.YYYY				Пример: 21.09.2018
+	 * \param str_datetime	Время в формате строки
+	 * \return Вернет метку времени, если преобразование завершилось успешно, или 0 в случае провала
+	 */
+	ztime::timestamp_t to_timestamp_ms(std::string str_datetime);
 
 	/** \brief Преобразовать строку с временем дня в секунду дня
 	 *
@@ -893,8 +910,8 @@ namespace ztime {
 	 * YYYY.MM.DD hh:mm:ss Пример: 2013.02.25 18:25:10
 	 * YYYY.MM.DD Пример: 2013.02.25
 	 * DD.MM.YYYY Пример: 21.09.2018
-	 * \param str   Время в формате строки, например
-	 * \param t     Метка времени
+	 * \param str	Время в формате строки, например
+	 * \param t		Метка времени
 	 * \return Вернет true если преобразование завершилось успешно
 	 */
 	bool convert_str_to_timestamp(std::string str, timestamp_t& t);
@@ -1153,7 +1170,7 @@ namespace ztime {
 	 * \param timestamp Метка времени
 	 * \return Метка времени в начале периода
 	 */
-	constexpr inline timestamp_t get_first_timestamp_period(const uint32_t period, const timestamp_t timestamp  = get_timestamp()) noexcept {
+	constexpr inline timestamp_t get_first_timestamp_period(const uint32_t period, const timestamp_t timestamp	= get_timestamp()) noexcept {
 		return timestamp - (timestamp % period);
 	}
 
@@ -1317,12 +1334,12 @@ namespace ztime {
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_beg_year(const uint32_t year) noexcept {
 		const uint64_t diff = (uint64_t)(year - FIRST_YEAR_UNIX);
-        const uint64_t t = (diff / 4ULL) * (uint64_t)SECONDS_IN_4_YEAR;
-        const uint64_t temp = diff % 4ULL;
-        if (temp == 0) return t;
-        else if (temp == 1) return t + (uint64_t)SECONDS_IN_YEAR;
-        else if (temp == 2) return t + (2ULL * (uint64_t)SECONDS_IN_YEAR);
-        return t + (2ULL * (uint64_t)SECONDS_IN_YEAR + (uint64_t)SECONDS_IN_LEAP_YEAR);
+		const uint64_t t = (diff / 4ULL) * (uint64_t)SECONDS_IN_4_YEAR;
+		const uint64_t temp = diff % 4ULL;
+		if (temp == 0) return t;
+		else if (temp == 1) return t + (uint64_t)SECONDS_IN_YEAR;
+		else if (temp == 2) return t + (2ULL * (uint64_t)SECONDS_IN_YEAR);
+		return t + (2ULL * (uint64_t)SECONDS_IN_YEAR + (uint64_t)SECONDS_IN_LEAP_YEAR);
 	}
 
 	 /** \brief Получить метку времени дня UINX-времени
