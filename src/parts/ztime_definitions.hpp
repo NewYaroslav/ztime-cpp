@@ -32,6 +32,7 @@ namespace ztime {
         Для того, чтобы можно было работать и после 19 января 2038 года, используем 64 бит, а не 32 бит
      */
     typedef uint64_t    timestamp_t;            ///< Integer timestamp type
+    typedef uint64_t    timestamp_ms_t;         ///< Integer timestamp ms type
     typedef double      ftimestamp_t;           ///< Floating point timestamp type
     typedef double      oadate_t;               ///< Automation date type (OADate) floating point
 

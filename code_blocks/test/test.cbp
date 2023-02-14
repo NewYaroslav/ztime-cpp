@@ -116,6 +116,8 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../../src/parts/ztime_definitions.hpp" />
+		<Unit filename="../../src/parts/ztime_timer.hpp" />
 		<Unit filename="../../src/ztime.cpp" />
 		<Unit filename="../../src/ztime.hpp" />
 		<Unit filename="../../src/ztime_cpu_time.hpp" />
