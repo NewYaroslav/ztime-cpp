@@ -938,7 +938,7 @@ namespace ztime {
 	 * \return Метка времени в начале часа
 	 */
 	constexpr inline timestamp_t get_first_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SEC_PER_DAY);
+		return timestamp - (timestamp % SEC_PER_HOUR);
 	}
 
 	/** \brief Получить метку времени в конце часа
@@ -947,7 +947,7 @@ namespace ztime {
 	 * \return Метка времени в конце часа
 	 */
 	constexpr inline timestamp_t get_last_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SEC_PER_DAY) + SEC_PER_DAY - 1;
+		return timestamp - (timestamp % SEC_PER_HOUR) + SEC_PER_HOUR - 1;
 	}
 
 	/** \brief Получить метку времени в начале минуты
