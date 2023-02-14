@@ -47,34 +47,7 @@ namespace ztime {
          * \param callback Your callback function that will be called asynchronously with a period of period_ms
          */
         Timer(const uint32_t interval_ms, const std::function<void()> &callback) : Timer() {
-            if (callback) {
-                period_ms = interval_ms;
-                m_timer_future = std::async(std::launch::async, [&, callback]() {
-
-                    std::mutex mtx;
-                    std::condition_variable cv;
-
-                    using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
-                    std::chrono::time_point<clock_t> start_time = clock_t::now();
-
-                    while (!false) {
-                        std::unique_lock<std::mutex> lock(mtx);
-                        cv.wait_for(lock, std::chrono::milliseconds(1));
-
-                        if (m_shutdown) return;
-                        if (!period_ms) continue;
-
-                        const uint32_t elapsed =
-                            std::chrono::duration_cast<ms_t>(
-                                clock_t::now() - start_time).count();
-
-                        if (elapsed >= period_ms) {
-                            start_time = clock_t::now();
-                            callback();
-                        }
-                    }
-                });
-            }
+            create_event(interval_ms, callback);
         }
 
         Timer(const std::function<void()> &callback) : Timer(0, callback) {
@@ -89,6 +62,48 @@ namespace ztime {
                     m_timer_future.get();
                 } catch(...) {}
             }
+        }
+
+        bool create_event(const uint32_t interval_ms, const std::function<void()> &callback) {
+            try {
+                std::call_once(m_once, [&, callback](){
+                    if (callback) {
+                        period_ms = interval_ms;
+                        m_timer_future = std::async(std::launch::async, [&, callback]() {
+
+                            std::mutex mtx;
+                            std::condition_variable cv;
+
+                            using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
+                            std::chrono::time_point<clock_t> start_time = clock_t::now();
+
+                            while (!false) {
+                                std::unique_lock<std::mutex> lock(mtx);
+                                cv.wait_for(lock, std::chrono::milliseconds(1));
+
+                                if (m_shutdown) return;
+                                if (!period_ms) continue;
+
+                                const uint32_t elapsed =
+                                    std::chrono::duration_cast<ms_t>(
+                                        clock_t::now() - start_time).count();
+
+                                if (elapsed >= period_ms) {
+                                    start_time = clock_t::now();
+                                    callback();
+                                }
+                            }
+                        });
+                    }
+                });
+            } catch(...) {
+                return false;
+            }
+            return true;
+        }
+
+        bool create_event(const std::function<void()> &callback) {
+            return create_event(0, callback);
         }
 
         /** \brief Reset the timer value
@@ -221,6 +236,7 @@ namespace ztime {
 
         std::future<void> m_timer_future;
         std::atomic<bool> m_shutdown = ATOMIC_VAR_INIT(false);
+        std::once_flag    m_once;
     };
 
 }
