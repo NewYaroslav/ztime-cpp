@@ -51,12 +51,12 @@ namespace ztime {
 
 	const timestamp_t get_timestamp_ms() noexcept {
 		const struct timespec ts = get_timespec();
-		return MILLISECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000000;
+		return MS_PER_SEC * ts.tv_sec + ts.tv_nsec / 1000000;
 	}
 
 	const timestamp_t get_timestamp_us() noexcept {
 		const struct timespec ts = get_timespec();
-		return MICROSECONDS_IN_SECOND * ts.tv_sec + ts.tv_nsec / 1000;
+		return US_PER_SEC * ts.tv_sec + ts.tv_nsec / 1000;
 	}
 
 	const ftimestamp_t get_ftimestamp() noexcept {
@@ -180,20 +180,20 @@ namespace ztime {
 		const long _TBIAS_DAYS = 25567;
 		_days = _TBIAS_DAYS;
 
-		_days += _secs / SECONDS_IN_DAY; _secs = _secs % SECONDS_IN_DAY;
-		hour = _secs / SECONDS_IN_HOUR; _secs %= SECONDS_IN_HOUR;
-		minute = _secs / SECONDS_IN_MINUTE; second = _secs % SECONDS_IN_MINUTE;
+		_days += _secs / SEC_PER_DAY; _secs = _secs % SEC_PER_DAY;
+		hour = _secs / SEC_PER_HOUR; _secs %= SEC_PER_HOUR;
+		minute = _secs / SEC_PER_MIN; second = _secs % SEC_PER_MIN;
 		const long lmos[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 		const long mos[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-		for(_year = _days / DAYS_IN_YEAR;
-			_days < (i = (((_year - 1) / 4) + ((((_year) & 03) || ((_year) == 0)) ? mos[0] : lmos[0]) + DAYS_IN_YEAR*_year));) {
+		for(_year = _days / DAYS_PER_YEAR;
+			_days < (i = (((_year - 1) / 4) + ((((_year) & 03) || ((_year) == 0)) ? mos[0] : lmos[0]) + DAYS_PER_YEAR*_year));) {
 			--_year;
 		}
 		_days -= i;
 		const long _TBIAS_YEAR = 1900;
 		year = _year + _TBIAS_YEAR;
-		_mon = MONTHS_IN_YEAR;
+		_mon = MONTHS_PER_YEAR;
 		if(((_year) & 03) || ((_year) == 0)) {
 			while(_days < mos[--_mon]) {};
 			month = _mon + 1;
@@ -411,9 +411,9 @@ namespace ztime {
 			return std::use_facet<std::ctype<char>>(std::locale()).tolower(ch);
 		});
 		month[0] = toupper(month[0]);
-		for(uint32_t i = 0; i < MONTHS_IN_YEAR; ++i) {
-			std::string name_long = month_name_long[i];
-			std::string name_short = month_name_short[i];
+		for(uint32_t i = 0; i < MONTHS_PER_YEAR; ++i) {
+			std::string name_long = MonthNameLong[i];
+			std::string name_short = MonthNameShort[i];
 			if(month == name_long) return i + 1;
 			if(month == name_short) return i + 1;
 		}
@@ -616,7 +616,7 @@ namespace ztime {
 
 	ztime::timestamp_t to_timestamp_ms(std::string str_datetime) {
 		int day = 0, month = 0, year = 0;
-		int hour = 0, minute = 0, second, millisecond = 0;
+		int hour = 0, minute = 0, second = 0, millisecond = 0;
 		str_datetime += "_";
 		std::vector<std::string> arguments;
 		std::size_t start_pos = 0;
@@ -731,7 +731,7 @@ namespace ztime {
 			year < 1970 || month > 12 || month <= 0) {
 			return 0;
 		}
-		return get_timestamp(day, month, year, hour, minute, second) * MILLISECONDS_IN_SECOND + millisecond;
+		return get_timestamp(day, month, year, hour, minute, second) * MS_PER_SEC + millisecond;
 	}
 
 	int to_second_day(std::string str_time) {
@@ -767,7 +767,7 @@ namespace ztime {
 			second >= 60 || second < 0) {
 			return -1;
 		}
-		return (int)(hour * ztime::SECONDS_IN_HOUR + minute * ztime::SECONDS_IN_MINUTE + second);
+		return (int)(hour * ztime::SEC_PER_HOUR + minute * ztime::SEC_PER_MIN + second);
 	}
 
 	DateTime convert_timestamp_to_datetime(const timestamp_t timestamp) {
@@ -781,25 +781,25 @@ namespace ztime {
 		const long _TBIAS_DAYS = 25567;
 		_days = _TBIAS_DAYS;
 
-		_days += _secs / SECONDS_IN_DAY; _secs = _secs % SECONDS_IN_DAY;
-		outTime.hour = _secs / SECONDS_IN_HOUR; _secs %= SECONDS_IN_HOUR;
-		outTime.minute = _secs / SECONDS_IN_MINUTE;
-		outTime.second = _secs % SECONDS_IN_MINUTE;
+		_days += _secs / SEC_PER_DAY; _secs = _secs % SEC_PER_DAY;
+		outTime.hour = _secs / SEC_PER_HOUR; _secs %= SEC_PER_HOUR;
+		outTime.minute = _secs / SEC_PER_MIN;
+		outTime.second = _secs % SEC_PER_MIN;
 		const long	lmos[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 		const long	mos[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-		for (_year = _days / DAYS_IN_YEAR; _days < (i = (((_year - 1) / 4) + ((((_year) & 03) || ((_year) == 0)) ? mos[0] : lmos[0]) + DAYS_IN_YEAR*_year)); ) { --_year; }
+		for (_year = _days / DAYS_PER_YEAR; _days < (i = (((_year - 1) / 4) + ((((_year) & 03) || ((_year) == 0)) ? mos[0] : lmos[0]) + DAYS_PER_YEAR*_year)); ) { --_year; }
 		_days -= i;
 		const long _TBIAS_YEAR = 1900;
 		outTime.year = _year + _TBIAS_YEAR;
 
 		if(((_year) & 03) || ((_year) == 0)) {
 			// mos
-			for(_mon = MONTHS_IN_YEAR; _days < mos[--_mon];);
+			for(_mon = MONTHS_PER_YEAR; _days < mos[--_mon];);
 			outTime.month = _mon + 1;
 			outTime.day = _days - mos[_mon] + 1;
 		} else {
-			for(_mon = MONTHS_IN_YEAR; _days < lmos[--_mon];);
+			for(_mon = MONTHS_PER_YEAR; _days < lmos[--_mon];);
 			outTime.month = _mon + 1;
 			outTime.day = _days - lmos[_mon] + 1;
 		}
@@ -821,7 +821,7 @@ namespace ztime {
 	}
 
 	uint32_t get_num_days_month(const uint32_t month, const uint32_t year) {
-		if(month > MONTHS_IN_YEAR)
+		if(month > MONTHS_PER_YEAR)
 			return 0;
 		const uint32_t num_days[13] = {0,31,30,31,30,31,30,31,31,30,31,30,31};
 		if(month == FEB) {
@@ -844,7 +844,7 @@ namespace ztime {
 	}
 
 	timestamp_t convert_gmt_to_cet(const timestamp_t gmt) {
-		const timestamp_t ONE_HOUR = SECONDS_IN_HOUR;
+		const timestamp_t ONE_HOUR = SEC_PER_HOUR;
 		const uint8_t OLD_START_SUMMER_HOUR = 2;
 		const uint8_t OLD_STOP_SUMMER_HOUR = 3;
 		const uint8_t NEW_SUMMER_HOUR = 1;
@@ -924,20 +924,20 @@ namespace ztime {
 	}
 
 	timestamp_t convert_gmt_to_eet(const timestamp_t gmt) {
-		return convert_gmt_to_cet(gmt) + SECONDS_IN_HOUR;
+		return convert_gmt_to_cet(gmt) + SEC_PER_HOUR;
 	}
 
 	timestamp_t convert_gmt_to_msk(const timestamp_t gmt) {
-		const timestamp_t gmt2 = gmt + 2 * SECONDS_IN_HOUR;
-		const timestamp_t gmt3 = gmt + 3 * SECONDS_IN_HOUR;
-		const timestamp_t gmt4 = gmt + 4 * SECONDS_IN_HOUR;
+		const timestamp_t gmt2 = gmt + 2 * SEC_PER_HOUR;
+		const timestamp_t gmt3 = gmt + 3 * SEC_PER_HOUR;
+		const timestamp_t gmt4 = gmt + 4 * SEC_PER_HOUR;
 
 		const timestamp_t OCT_26_2014 = 1414281600;
 		const timestamp_t MAR_27_2011 = 1301184000;
 		const timestamp_t JAN_19_1992 = 695782800;
 		const timestamp_t YEAR_1991 = 662688000;
-		const timestamp_t OFFSET_HOUR1 = 23*SECONDS_IN_HOUR + 1;
-		const timestamp_t OFFSET_HOUR2 = 22*SECONDS_IN_HOUR + 1;
+		const timestamp_t OFFSET_HOUR1 = 23 * SEC_PER_HOUR + 1;
+		const timestamp_t OFFSET_HOUR2 = 22 * SEC_PER_HOUR + 1;
 
 		//int year4 = get_year(gmt4);
 		//int month4 = get_month_year(gmt4);
@@ -955,53 +955,53 @@ namespace ztime {
 			uint32_t month2 = get_month(gmt2);
 			//uint32_t month3 = get_month_year(gmt3);
 			uint32_t month4 = get_month(gmt4);
-			if(month2 == MAR) {
+			if(month2 == Month::MAR) {
 				if(gmt2 < last_timestamp_sunday2) return gmt3;
 				else return gmt4;
 			} else
-			if(month2 < MAR) return gmt3;
+			if(month2 < Month::MAR) return gmt3;
 			else
-			if(month4 == SEPT) {
+			if(month4 == Month::SEP) {
 				timestamp_t last_timestamp_sunday4 = get_last_timestamp_sunday_month(gmt4);
 				if(gmt4 < (last_timestamp_sunday4 - OFFSET_HOUR1)) return gmt3;
 				else return gmt4;
 			} else
-			if(month4 >= SEPT) return gmt3;
+			if(month4 >= Month::SEP) return gmt3;
 			else return gmt4;
 		} else
 		if(gmt3 >= YEAR_1991) {
 			//timestamp_t last_timestamp_sunday2 = get_last_timestamp_sunday_month(gmt2);
 			uint32_t month3 = get_month(gmt3);
-			if(month3 == SEPT) {
+			if(month3 == Month::SEP) {
 				timestamp_t last_timestamp_sunday3 = get_last_timestamp_sunday_month(gmt3);
 				if(gmt3 < (last_timestamp_sunday3 - OFFSET_HOUR2)) return gmt3;
 				else return gmt4;
 			} else
-			if(month3 >= SEPT) return gmt2;
+			if(month3 >= Month::SEP) return gmt2;
 			else return gmt3;
 		} else {
 			timestamp_t last_timestamp_sunday3 = get_last_timestamp_sunday_month(gmt3);
 			uint32_t month2 = get_month(gmt2);
 			uint32_t month3 = get_month(gmt3);
 			uint32_t month4 = get_month(gmt4);
-			if(month3 == MAR) {
+			if(month3 == Month::MAR) {
 				if(gmt3 < last_timestamp_sunday3) return gmt3;
 				else return gmt4;
 			} else
-			if(month2 < MAR) return gmt3;
+			if(month2 < Month::MAR) return gmt3;
 			else
-			if(month4 == SEPT) {
+			if(month4 == Month::SEP) {
 				timestamp_t last_timestamp_sunday4 = get_last_timestamp_sunday_month(gmt4);
 				if(gmt4 < (last_timestamp_sunday4 - OFFSET_HOUR1)) return gmt3;
 				else return gmt4;
 			} else
-			if(month4 >= SEPT) return gmt3;
+			if(month4 >= Month::SEP) return gmt3;
 			else return gmt4;
 		}
 	}
 
 	timestamp_t convert_cet_to_gmt(const timestamp_t cet) {
-		const timestamp_t ONE_HOUR = SECONDS_IN_HOUR;
+		const timestamp_t ONE_HOUR = SEC_PER_HOUR;
 		const uint32_t OLD_START_SUMMER_HOUR = 2;
 		const uint32_t OLD_STOP_SUMMER_HOUR = 3;
 		const uint32_t NEW_SUMMER_HOUR = 1;
@@ -1080,7 +1080,7 @@ namespace ztime {
 	}
 
 	timestamp_t convert_eet_to_gmt(const timestamp_t eet) {
-		return convert_cet_to_gmt(eet - SECONDS_IN_HOUR);
+		return convert_cet_to_gmt(eet - SEC_PER_HOUR);
 	}
 
 	std::string get_str_date_time(const timestamp_t timestamp) {
@@ -1185,7 +1185,7 @@ namespace ztime {
 								text += std::string(str_temp);
 							} else
 							if(tick == 1) {
-								text += month_name_short[t.month];
+								text += MonthNameShort[t.month];
 							}
 							is_cmd = false;
 						}
@@ -1213,7 +1213,7 @@ namespace ztime {
 					case 'w':
 						if(is_cmd) {
 							if(tick == 1) {
-								text += weekday_name_short[t.get_weekday()];
+								text += WeekdayNameShort[t.get_weekday()];
 							}
 							is_cmd = false;
 						}
@@ -1272,9 +1272,9 @@ namespace ztime {
 	}
 
 	bool is_correct_date(const uint32_t day, const uint32_t month, const uint32_t year) {
-		if(day < 1 || day > MAX_DAY_MONTH) return false;
-		if(month > MONTHS_IN_YEAR || month < 1) return false;
-		if(year < FIRST_YEAR_UNIX) return false;
+		if(day < 1 || day > MAX_DAYS_PER_MONTH) return false;
+		if(month > MONTHS_PER_YEAR || month < 1) return false;
+		if(year < UNIX_EPOCH) return false;
 		if(day > get_num_days_month(month, year)) return false;
 		return true;
 	}

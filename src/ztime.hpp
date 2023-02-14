@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-
+#pragma once
 #ifndef ZTIME_HPP_INCLUDED
 #define ZTIME_HPP_INCLUDED
 
@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cmath>
 #include "parts/ztime_timer.hpp"
+#include "parts/ztime_definitions.hpp"
 
 #if __cplusplus <= 201103L
 #	define ZTIME_CONSTEXPR
@@ -40,127 +41,6 @@
 #endif
 
 namespace ztime {
-	/* для того, чтобы можно было работать и после 19 января 2038 года,
-	 * используем 64 бит, а не 32 бит
-	 */
-	typedef uint64_t timestamp_t;			///< Целочисленный тип метки врмени
-	/* для работы с миллисекундами */
-	typedef double ftimestamp_t;			///< Тип метки времени с плавающей точкой
-	typedef double oadate_t;				///< Тип даты автоматизации (OADate) с плавающей точкой
-
-	const timestamp_t TIMESTAMP_MAX = 0xFFFFFFFFFFFFFFFF;	///< Максимально возможное значение для типа timestamp_t
-	const oadate_t OADATE_MAX = 9223372036854775807;		///< Максимально возможное значение даты автоматизации (OADate)
-	const double AVERAGE_DAYS_IN_YEAR = 365.25;				///< Среднее количество дней за год
-
-	/// Различные периоды
-	enum {
-		NANOSECONDS_IN_SECOND = 1000000000,	///< Количество наносекунд в одной секунде
-		MICROSECONDS_IN_SECOND = 1000000,	///< Количество микросекунд в одной секунде
-		MILLISECONDS_IN_SECOND = 1000,		///< Количество миллисекунд в одной секунде
-		MILLISECONDS_IN_MINUTE = 60000,		///< Количество миллисекунд в одной минуте
-		MILLISECONDS_IN_HALF_HOUR = 1800000,///< Количество миллисекунд в получасе
-		MILLISECONDS_IN_HOUR = 3600000,		///< Количество миллисекунд в часе
-		MILLISECONDS_IN_DAY = 86400000,		///< Количество миллисекунд в одном дне
-		SECONDS_IN_MINUTE = 60,				///< Количество секунд в одной минуте
-		SECONDS_IN_HALF_HOUR = 1800,		///< Количество секунд в получасе
-		SECONDS_IN_HOUR = 3600,				///< Количество секунд в часе
-		SECONDS_IN_DAY = 86400,				///< Количество секунд в дне
-		SECONDS_IN_YEAR = 31536000,			///< Количество секунд за год
-		SECONDS_IN_LEAP_YEAR = 31622400,	///< Количество секунд за високосный год
-		AVERAGE_SECONDS_IN_YEAR = 31557600, ///< Среднее количество секунд за год
-		SECONDS_IN_4_YEAR = 126230400,		///< Количество секунд за 4 года
-		MINUTES_IN_HOUR = 60,				///< Количество минут в одном часе
-		MINUTES_IN_DAY = 1440,				///< Количество минут в одном дне
-		MINUTES_IN_WEEK = 10080,			///< Количество минут в одной неделе
-		MINUTES_IN_MONTH = 40320,			///< Количество минут в одном месяце
-		HOURS_IN_DAY = 24,					///< Количество часов в одном дне
-		MONTHS_IN_YEAR = 12,				///< Количество месяцев в году
-		DAYS_IN_WEEK = 7,					///< Количество дней в неделе
-		DAYS_IN_LEAP_YEAR = 366,			///< Количество дней в високосом году
-		DAYS_IN_YEAR = 365,					///< Количество дней в году
-		DAYS_IN_4_YEAR = 1461,				///< Количество дней за 4 года
-		FIRST_YEAR_UNIX = 1970,				///< Год начала UNIX времени
-		MAX_DAY_MONTH = 31,					///< Максимальное количество дней в месяце
-		OADATE_UNIX_EPOCH = 25569,			///< Дата автоматизации OLE с момента эпохи UNIX
-	};
-
-	/// Скоращенные имена дней неделии
-	enum {
-		SUN = 0,	///< Воскресенье
-		MON,		///< Понедельник
-		TUS,		///< Вторник
-		WED,		///< Среда
-		THU,		///< Четверг
-		FRI,		///< Пятница
-		SAT,		///< Суббота
-	};
-
-	/// Скоращенные имена месяцев
-	enum {
-		JAN = 1,	///< Январь
-		FEB,		///< Февраль
-		MAR,		///< Март
-		APR,		///< Апрель
-		MAY,		///< Май
-		JUNE,		///< Июнь
-		JULY,		///< Июль
-		AUG,		///< Август
-		SEPT,		///< Сентябрь
-		OCT,		///< Октябрь
-		NOV,		///< Ноябрь
-		DEC,		///< Декабрь
-	};
-
-	/// Фазы Луны
-	enum {
-		WAXING_CRESCENT_MOON,
-		FIRST_QUARTER_MOON,
-		WAXING_GIBBOUS_MOON,
-		FULL_MOON,
-		WANING_GIBBOUS_MOON,
-		LAST_QUARTER_MOON,
-		WANING_CRESCENT_MOON,
-		NEW_MOON,
-	};
-
-	template<class T>
-	struct Period {
-		T start;
-		T stop;
-
-		Period() : start(0), stop(0) {};
-
-		Period(T &a, T &b) : start(a), stop(b) {};
-
-		Period(const T &a, const T &b) : start(a), stop(b) {};
-	};
-
-	typedef Period<uint64_t> period_t;	///< Целочисленный тип периода времени
-	typedef Period<double> fperiod_t;	///< Тип периода времени с плавающей точкой
-
-	const std::array<std::string, MONTHS_IN_YEAR> month_name_long = {
-		"January","February","March",
-		"April","May","June",
-		"July","August","September",
-		"October","November","December",
-	}; /**< Длинные имена месяцев */
-
-	const std::array<std::string, MONTHS_IN_YEAR> month_name_short = {
-		"Jan","Feb","Mar",
-		"Apr","May","June",
-		"July","Aug","Sept",
-		"Oct","Nov","Dec",
-	}; /**< Сокращенные имена месяцев */
-
-	const std::array<std::string, DAYS_IN_WEEK> weekday_name_short = {
-		"SUN",
-		"MON",
-		"TUS",
-		"WED",
-		"THU",
-		"FRI",
-		"SAT",
-	}; /**< Сокращенные имена дней недели */
 
 	/** \brief Получить миллисекунду секунды
 	 * \return Миллисекунда секунды
@@ -232,14 +112,14 @@ namespace ztime {
 		long _year = year - _TBIAS_YEAR;
 		// для предотвращения проблемы 2038 года переменная должна быть больше 32 бит
 		long long _days = (((_year - 1) / 4) + ((((_year) & 03) || ((_year) == 0)) ? mos[_mon] : lmos[_mon])) - 1;
-		_days += DAYS_IN_YEAR * _year;
+		_days += DAYS_PER_YEAR * _year;
 		_days += day;
 		const long _TBIAS_DAYS = 25567;
 		_days -= _TBIAS_DAYS;
-		timestamp_t _secs = SECONDS_IN_HOUR * hour;
-		_secs += SECONDS_IN_MINUTE * minute;
+		timestamp_t _secs = SEC_PER_HOUR * hour;
+		_secs += SEC_PER_MIN * minute;
 		_secs += second;
-		_secs += _days * SECONDS_IN_DAY;
+		_secs += _days * SEC_PER_DAY;
 		return _secs;
 	}
 
@@ -285,7 +165,7 @@ namespace ztime {
 	 * \return Дата автоматизации OLE
 	 */
 	constexpr inline oadate_t convert_timestamp_to_oadate(const timestamp_t timestamp) noexcept {
-		return (const oadate_t)OADATE_UNIX_EPOCH + (const oadate_t)timestamp / (const oadate_t)SECONDS_IN_DAY;
+		return (const oadate_t)OLE_EPOCH + (const oadate_t)timestamp / (const oadate_t)SEC_PER_DAY;
 	}
 
 	/** \brief Получить дату автоматизации OLE из метки времени c плавающей точкой
@@ -293,7 +173,7 @@ namespace ztime {
 	 * \return Дата автоматизации OLE
 	 */
 	constexpr inline oadate_t convert_ftimestamp_to_oadate(const ftimestamp_t timestamp) noexcept {
-		return (const oadate_t)OADATE_UNIX_EPOCH + (const oadate_t)timestamp / (const oadate_t)SECONDS_IN_DAY;
+		return (const oadate_t)OLE_EPOCH + (const oadate_t)timestamp / (const oadate_t)SEC_PER_DAY;
 	}
 
 	/** \brief Преобразовать дату автоматизации OLE в метку времени
@@ -301,8 +181,8 @@ namespace ztime {
 	 * \return Метка времени
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t convert_oadate_to_timestamp(const oadate_t oadate) noexcept {
-		if(oadate < (const oadate_t)OADATE_UNIX_EPOCH) return 0;
-		return (timestamp_t)((oadate - (oadate_t)OADATE_UNIX_EPOCH) * (oadate_t)SECONDS_IN_DAY);
+		if(oadate < (const oadate_t)OLE_EPOCH) return 0;
+		return (timestamp_t)((oadate - (oadate_t)OLE_EPOCH) * (oadate_t)SEC_PER_DAY);
 	}
 
 	/** \brief Преобразовать дату автоматизации OLE в метку времени	 плавающей точкой
@@ -310,8 +190,8 @@ namespace ztime {
 	 * \return Метка времени с плавающей точкой
 	 */
 	ZTIME_CONSTEXPR inline ftimestamp_t convert_oadate_to_ftimestamp(const oadate_t oadate) noexcept {
-		if(oadate < (const oadate_t)OADATE_UNIX_EPOCH) return 0;
-		return (ftimestamp_t)((oadate - (oadate_t)OADATE_UNIX_EPOCH) * (oadate_t)SECONDS_IN_DAY);
+		if(oadate < (const oadate_t)OLE_EPOCH) return 0;
+		return (ftimestamp_t)((oadate - (oadate_t)OLE_EPOCH) * (oadate_t)SEC_PER_DAY);
 	}
 
 	/** \brief Получить дату автоматизации OLE
@@ -733,85 +613,6 @@ namespace ztime {
 		void set_oadate(const oadate_t oadate);
 	};
 
-	#if(0)
-	/** \brief Таймер для измерений задержек
-	 */
-	class Timer {
-	private:
-		/* steady_clock представляет собой монотонные часы.
-		 * Точки времени на этих часах не могут уменьшаться по мере того,
-		 * как физическое время движется вперед,
-		 * и время между тактами этих часов остается постоянным.
-		 * Эти часы не связаны со временем настенных часов
-		 * (например, это может быть время с момента последней перезагрузки)
-		 * и больше всего подходят для измерения интервалов.
-		 */
-		using clock_t = std::chrono::steady_clock;
-		using second_t = std::chrono::duration<double, std::ratio<1>>;
-
-		std::chrono::time_point<clock_t> start_time;
-		double sum = 0;
-		uint64_t counter = 0;
-	public:
-		Timer() : start_time(clock_t::now()) {}
-
-		/** \brief Сбросить значение таймера
-		 *
-		 * Данный метод нужно применять только вместе с методом elapsed()
-		 * При использовании метода
-		 * get_average_measurements() сбрасывать таймер не нужно!
-		 */
-		inline void reset() {
-			start_time = clock_t::now();
-		}
-
-		/** \brief Получить замер времени
-		 * \return Время в секундах с момента инициализации класса или после reset()
-		 */
-		inline double get_elapsed() const {
-			return std::chrono::duration_cast<second_t>(clock_t::now() - start_time).count();
-		}
-
-		/** \brief Сбросить все замеры
-		 *
-		 * Данный метод обнуляет сумму замеров и их количество
-		 */
-		inline void reset_measurement() {
-			sum = 0;
-			counter = 0;
-		}
-
-		/** \brief Начать замер
-		 *
-		 * Данный метод использовать вместе с методами stop_measurement()
-		 * и get_average_measurements()
-		 */
-		inline void start_measurement() {
-			reset();
-		}
-
-		/** \brief Остановить замер
-		 *
-		 * Данный метод использовать вместе с методами start_measurement()
-		 * и get_average_measurements()
-		 */
-		inline void stop_measurement() {
-			sum += get_elapsed();
-			++counter;
-		}
-
-		/** \brief Получить результаты замеров
-		 *
-		 * Данный метод использовать вместе с методами start_measurement()
-		 * и stop_measurement(). Метод возвращает средний результат замеров
-		 * \return Среднее время замеров в секундах
-		 */
-		inline double get_average_measurements() const {
-			return sum / (double)counter;
-		}
-	};
-	#endif
-
 	/** \brief Конвертировать строку в формате ISO в данные класса DateTime
 	 * \param str_datetime	Cтрока в формате ISO, например 2013-12-06T15:23:01+00:00
 	 * \param t				Класс времени и даты DateTime, который будет заполнен.
@@ -887,7 +688,7 @@ namespace ztime {
 	 * \return день недели (SUN = 0, MON = 1, ... SAT = 6)
 	 */
 	constexpr inline uint32_t get_weekday(const timestamp_t timestamp) noexcept {
-		return ((timestamp / SECONDS_IN_DAY + THU) % DAYS_IN_WEEK);
+		return ((timestamp / SEC_PER_DAY + THU) % DAYS_PER_WEEK);
 	}
 
 	/** \brief Получить номер месяца по названию
@@ -996,7 +797,7 @@ namespace ztime {
 	 * \return вернет true, если начало получаса
 	 */
 	inline bool is_beg_half_hour(const timestamp_t timestamp = get_timestamp()) {
-		return timestamp % SECONDS_IN_HALF_HOUR == 0;
+		return timestamp % SEC_PER_HALF_HOUR == 0;
 	}
 
 	/** \brief Проверить начало часа
@@ -1004,7 +805,7 @@ namespace ztime {
 	 * \return вернет true, если начало часа
 	 */
 	inline bool is_beg_hour(const timestamp_t timestamp = get_timestamp()) {
-		return timestamp % SECONDS_IN_HOUR == 0;
+		return timestamp % SEC_PER_HOUR == 0;
 	}
 
 	/** \brief Проверить начало дня
@@ -1012,7 +813,7 @@ namespace ztime {
 	 * \return вернет true, если начало дня
 	 */
 	inline bool is_beg_day(const timestamp_t timestamp = get_timestamp()) {
-		return (timestamp % SECONDS_IN_DAY == 0);
+		return (timestamp % SEC_PER_DAY == 0);
 	}
 
 	/** \brief Проверить начало недели
@@ -1090,11 +891,11 @@ namespace ztime {
 	 * \return Метка времени начала года
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_first_timestamp_year(const timestamp_t timestamp) noexcept {
-		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
-		if(t < SECONDS_IN_YEAR) return timestamp - t;
-		else if(t < (2*SECONDS_IN_YEAR)) return timestamp + SECONDS_IN_YEAR - t;
-		else if(t < (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR)) return timestamp + (2*SECONDS_IN_YEAR) - t;
-		return timestamp + (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR) - t;
+		timestamp_t t = timestamp % SEC_PER_4_YEARS;
+		if(t < SEC_PER_YEAR) return timestamp - t;
+		else if(t < (2*SEC_PER_YEAR)) return timestamp + SEC_PER_YEAR - t;
+		else if(t < (2*SEC_PER_YEAR + SEC_PER_LEAP_YEAR)) return timestamp + (2*SEC_PER_YEAR) - t;
+		return timestamp + (2*SEC_PER_YEAR + SEC_PER_LEAP_YEAR) - t;
 	}
 
 	/** \brief Получить метку времени в конце года
@@ -1104,11 +905,11 @@ namespace ztime {
 	 * \return Метка времени конца года
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_last_timestamp_year(const timestamp_t timestamp = get_timestamp()) noexcept {
-		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
-		if(t < SECONDS_IN_YEAR) return timestamp + SECONDS_IN_YEAR - t - 1;
-		else if(t < (2*SECONDS_IN_YEAR)) return timestamp + (2*SECONDS_IN_YEAR) - t - 1;
-		else if(t < (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR)) return timestamp + (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR) - t - 1;
-		return timestamp + (3*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR) - t - 1;
+		timestamp_t t = timestamp % SEC_PER_4_YEARS;
+		if(t < SEC_PER_YEAR) return timestamp + SEC_PER_YEAR - t - 1;
+		else if(t < (2*SEC_PER_YEAR)) return timestamp + (2*SEC_PER_YEAR) - t - 1;
+		else if(t < (2*SEC_PER_YEAR + SEC_PER_LEAP_YEAR)) return timestamp + (2*SEC_PER_YEAR + SEC_PER_LEAP_YEAR) - t - 1;
+		return timestamp + (3*SEC_PER_YEAR + SEC_PER_LEAP_YEAR) - t - 1;
 	}
 
 	/** \brief Получить метку времени в начале дня
@@ -1119,7 +920,7 @@ namespace ztime {
 	 * \return Метка времени в начале дня
 	 */
 	constexpr inline timestamp_t get_first_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_DAY);
+		return timestamp - (timestamp % SEC_PER_DAY);
 	}
 
 	/** \brief Получить метку времени в конце дня
@@ -1128,7 +929,7 @@ namespace ztime {
 	 * \return Метка времени в конце дня
 	 */
 	constexpr inline timestamp_t get_last_timestamp_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_DAY) + SECONDS_IN_DAY - 1;
+		return timestamp - (timestamp % SEC_PER_DAY) + SEC_PER_DAY - 1;
 	}
 
 	/** \brief Получить метку времени в начале часа
@@ -1137,7 +938,7 @@ namespace ztime {
 	 * \return Метка времени в начале часа
 	 */
 	constexpr inline timestamp_t get_first_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_HOUR);
+		return timestamp - (timestamp % SEC_PER_DAY);
 	}
 
 	/** \brief Получить метку времени в конце часа
@@ -1146,7 +947,7 @@ namespace ztime {
 	 * \return Метка времени в конце часа
 	 */
 	constexpr inline timestamp_t get_last_timestamp_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_HOUR) + SECONDS_IN_HOUR - 1;
+		return timestamp - (timestamp % SEC_PER_DAY) + SEC_PER_DAY - 1;
 	}
 
 	/** \brief Получить метку времени в начале минуты
@@ -1155,7 +956,7 @@ namespace ztime {
 	 * \return Метка времени в начале минуты
 	 */
 	constexpr inline timestamp_t get_first_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_MINUTE);
+		return timestamp - (timestamp % SEC_PER_MIN);
 	}
 
 	/** \brief Получить метку времени в конце минуты
@@ -1164,7 +965,7 @@ namespace ztime {
 	 * \return Метка времени в конце минуты
 	 */
 	constexpr inline timestamp_t get_last_timestamp_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return timestamp - (timestamp % SECONDS_IN_MINUTE) + SECONDS_IN_MINUTE - 1;
+		return timestamp - (timestamp % SEC_PER_MIN) + SEC_PER_MIN - 1;
 	}
 
 	/** \brief Получить метку времени в начале периода
@@ -1202,7 +1003,7 @@ namespace ztime {
 	 * \return вернет true если выходной день
 	 */
 	ZTIME_CONSTEXPR inline bool is_day_off_for_day(const uint32_t day) noexcept {
-		uint32_t wday = (day + THU) % DAYS_IN_WEEK;
+		uint32_t wday = (day + THU) % DAYS_PER_WEEK;
 		if(wday == ztime::SUN || wday == ztime::SAT) return true;
 		return false;
 	}
@@ -1252,7 +1053,7 @@ namespace ztime {
 	 * \return Минута с начала UNIX
 	 */
 	constexpr inline uint64_t get_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint64_t)(timestamp / SECONDS_IN_MINUTE);
+		return (uint64_t)(timestamp / SEC_PER_MIN);
 	}
 
 	/** \brief Получить минуту дня
@@ -1262,7 +1063,7 @@ namespace ztime {
 	 * \return минута дня
 	 */
 	constexpr inline uint32_t get_minute_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)((timestamp / SECONDS_IN_MINUTE) % MINUTES_IN_DAY);
+		return (uint32_t)((timestamp / SEC_PER_MIN) % MIN_PER_DAY);
 	}
 
 	/** \brief Получить минуту часа
@@ -1272,7 +1073,7 @@ namespace ztime {
 	 * \return Минута часа
 	 */
 	constexpr inline uint32_t get_minute_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)((timestamp / SECONDS_IN_MINUTE) % MINUTES_IN_HOUR);
+		return (uint32_t)((timestamp / SEC_PER_MIN) % MIN_PER_HOUR);
 	}
 
 	/** \brief Получить час дня
@@ -1281,7 +1082,7 @@ namespace ztime {
 	 * \return час дня
 	 */
 	constexpr inline uint32_t get_hour_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)((timestamp / SECONDS_IN_HOUR) % HOURS_IN_DAY);
+		return (uint32_t)((timestamp / SEC_PER_HOUR) % HOURS_PER_DAY);
 	}
 
 	/** \brief Получить секунду минуты
@@ -1290,7 +1091,7 @@ namespace ztime {
 	 * \return секунда минуты
 	 */
 	constexpr inline uint32_t get_second_minute(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)(timestamp % SECONDS_IN_MINUTE);
+		return (uint32_t)(timestamp % SEC_PER_MIN);
 	}
 
 	/** \brief Получить секунду часа
@@ -1299,7 +1100,7 @@ namespace ztime {
 	 * \return секунда часа
 	 */
 	constexpr inline uint32_t get_second_hour(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)(timestamp % SECONDS_IN_HOUR);
+		return (uint32_t)(timestamp % SEC_PER_HOUR);
 	}
 
 	/** \brief Получить секунду дня
@@ -1308,7 +1109,7 @@ namespace ztime {
 	 * \return Секунда дня
 	 */
 	constexpr inline uint32_t get_second_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)(timestamp % SECONDS_IN_DAY);
+		return (uint32_t)(timestamp % SEC_PER_DAY);
 	}
 
 	/** \brief Получить секунду дня
@@ -1319,7 +1120,7 @@ namespace ztime {
 	 * \return Секунда дня
 	 */
 	constexpr inline uint32_t get_second_day(const uint32_t hour, const uint32_t minute, const uint32_t second) noexcept {
-		return hour * SECONDS_IN_HOUR + minute * SECONDS_IN_MINUTE + second;
+		return hour * SEC_PER_HOUR + minute * SEC_PER_MIN + second;
 	}
 
 	/** \brief Получить день
@@ -1328,7 +1129,7 @@ namespace ztime {
 	 * \return день с начала UNIX времени
 	 */
 	constexpr inline uint32_t get_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return (uint32_t)(timestamp / SECONDS_IN_DAY);
+		return (uint32_t)(timestamp / SEC_PER_DAY);
 	}
 
 	/** \brief Получить метку времени начала года
@@ -1336,13 +1137,13 @@ namespace ztime {
 	 * \return метка времени начала года
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_beg_year(const uint32_t year) noexcept {
-		const uint64_t diff = (uint64_t)(year - FIRST_YEAR_UNIX);
-		const uint64_t t = (diff / 4ULL) * (uint64_t)SECONDS_IN_4_YEAR;
+		const uint64_t diff = (uint64_t)(year - UNIX_EPOCH);
+		const uint64_t t = (diff / 4ULL) * (uint64_t)SEC_PER_4_YEARS;
 		const uint64_t temp = diff % 4ULL;
 		if (temp == 0) return t;
-		else if (temp == 1) return t + (uint64_t)SECONDS_IN_YEAR;
-		else if (temp == 2) return t + (2ULL * (uint64_t)SECONDS_IN_YEAR);
-		return t + (2ULL * (uint64_t)SECONDS_IN_YEAR + (uint64_t)SECONDS_IN_LEAP_YEAR);
+		else if (temp == 1) return t + (uint64_t)SEC_PER_YEAR;
+		else if (temp == 2) return t + (2ULL * (uint64_t)SEC_PER_YEAR);
+		return t + (2ULL * (uint64_t)SEC_PER_YEAR + (uint64_t)SEC_PER_LEAP_YEAR);
 	}
 
 	 /** \brief Получить метку времени дня UINX-времени
@@ -1350,7 +1151,7 @@ namespace ztime {
 	 * \return метка времени начала дня с момента начала UNIX-времени
 	 */
 	ZTIME_CONSTEXPR inline timestamp_t get_timestamp_day(const uint32_t unix_day) noexcept {
-		return (timestamp_t)unix_day * SECONDS_IN_DAY;
+		return (timestamp_t)unix_day * SEC_PER_DAY;
 	}
 
 	/** \brief Получить год
@@ -1359,11 +1160,11 @@ namespace ztime {
 	 * \return год UNIX времени
 	 */
 	ZTIME_CONSTEXPR inline uint32_t get_year(const timestamp_t timestamp = get_timestamp()) noexcept {
-		uint32_t year = FIRST_YEAR_UNIX + 4 * (timestamp / SECONDS_IN_4_YEAR);
-		timestamp_t t = timestamp % SECONDS_IN_4_YEAR;
-		if(t < SECONDS_IN_YEAR) return year;
-		else if(t < (2*SECONDS_IN_YEAR)) return year + 1;
-		else if(t < (2*SECONDS_IN_YEAR + SECONDS_IN_LEAP_YEAR)) return year + 2;
+		uint32_t year = UNIX_EPOCH + 4 * (timestamp / SEC_PER_4_YEARS);
+		timestamp_t t = timestamp % SEC_PER_4_YEARS;
+		if(t < SEC_PER_YEAR) return year;
+		else if(t < (2*SEC_PER_YEAR)) return year + 1;
+		else if(t < (2*SEC_PER_YEAR + SEC_PER_LEAP_YEAR)) return year + 2;
 		return year + 3;
 	}
 
@@ -1389,7 +1190,7 @@ namespace ztime {
 	inline timestamp_t get_first_timestamp_month(const timestamp_t timestamp = get_timestamp()) noexcept {
 		uint32_t day = get_day_month(timestamp);
 		timestamp_t timestamp_new = get_first_timestamp_day(timestamp);
-		timestamp_new -= (day - 1) * SECONDS_IN_DAY;
+		timestamp_new -= (day - 1) * SEC_PER_DAY;
 		return timestamp_new;
 	}
 
@@ -1402,7 +1203,7 @@ namespace ztime {
 		uint32_t day = get_day_month(timestamp);
 		timestamp_t timestamp_new = get_last_timestamp_day(timestamp);
 		uint32_t offset = days_month - day;
-		timestamp_new += offset * SECONDS_IN_DAY;
+		timestamp_new += offset * SEC_PER_DAY;
 		return timestamp_new;
 	}
 
@@ -1413,7 +1214,7 @@ namespace ztime {
 	inline timestamp_t get_last_timestamp_sunday_month(const timestamp_t timestamp = get_timestamp()) noexcept {
 		timestamp_t last_timestamp = get_last_timestamp_month(timestamp);
 		uint32_t weekday = get_weekday(timestamp);
-		last_timestamp -= weekday * SECONDS_IN_DAY;
+		last_timestamp -= weekday * SEC_PER_DAY;
 		return last_timestamp;
 	}
 
@@ -1422,8 +1223,8 @@ namespace ztime {
 	 * \return дней в текущем году
 	 */
 	inline uint32_t get_day_in_year(const timestamp_t timestamp = get_timestamp()) noexcept {
-		if(is_leap_year(get_year(timestamp))) return DAYS_IN_LEAP_YEAR;
-		return DAYS_IN_YEAR;
+		if(is_leap_year(get_year(timestamp))) return DAYS_PER_LEAP_YEAR;
+		return DAYS_PER_YEAR;
 	}
 
 	/** \brief Получить метку времени начала дня от начала unix-времени
@@ -1431,7 +1232,7 @@ namespace ztime {
 	 * \return метка времени
 	 */
 	inline timestamp_t get_first_timestamp_for_day(const uint32_t day) noexcept {
-		return day * SECONDS_IN_DAY;
+		return day * SEC_PER_DAY;
 	}
 
 	/** \brief Получить метку времени начала предыдущего дня
@@ -1439,7 +1240,7 @@ namespace ztime {
 	 * \return метка времени начала предыдущего дня
 	 */
 	inline timestamp_t get_first_timestamp_previous_day(const timestamp_t timestamp = get_timestamp()) noexcept {
-		return get_first_timestamp_day(timestamp) - SECONDS_IN_DAY;
+		return get_first_timestamp_day(timestamp) - SEC_PER_DAY;
 	}
 
 	/** \brief Получить метку времени начала дня начала недели
@@ -1451,7 +1252,7 @@ namespace ztime {
 	 */
 	inline timestamp_t get_week_start_first_timestamp(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return get_first_timestamp_day(timestamp) -
-			(timestamp_t)get_weekday(timestamp) * SECONDS_IN_DAY;
+			(timestamp_t)get_weekday(timestamp) * SEC_PER_DAY;
 	}
 
 	/** \brief Получить метку времени начала дня конца недели
@@ -1463,7 +1264,7 @@ namespace ztime {
 	 */
 	inline timestamp_t get_week_end_first_timestamp(const timestamp_t timestamp = get_timestamp()) noexcept {
 		return get_first_timestamp_day(timestamp) +
-			(timestamp_t)(SAT - get_weekday(timestamp)) * SECONDS_IN_DAY;
+			(timestamp_t)(SAT - get_weekday(timestamp)) * SEC_PER_DAY;
 	}
 
 	/** \brief Получить метку времени начала дня через указанное количество дней
@@ -1477,7 +1278,7 @@ namespace ztime {
 			const timestamp_t timestamp,
 			const uint32_t days) noexcept {
 		return get_first_timestamp_day(timestamp) +
-			((timestamp_t)days * SECONDS_IN_DAY);
+			((timestamp_t)days * SEC_PER_DAY);
 	}
 
 	/** \brief Преобразовать метку времени в секундах в метку времени в миллисекундах
@@ -1486,7 +1287,7 @@ namespace ztime {
 	 */
 	template<class T1, class T2>
 	inline T1 to_timestamp_ms(const T2 timestamp) noexcept {
-		return (T1)timestamp * (T1)MILLISECONDS_IN_SECOND;
+		return (T1)timestamp * (T1)MS_PER_SEC;
 	}
 
 	/** \brief Преобразовать метку времени в миллисекундах в метку времени в секундах
@@ -1495,7 +1296,7 @@ namespace ztime {
 	 */
 	template<class T1, class T2>
 	inline T1 to_timestamp(const T2 timestamp_ms) noexcept {
-		return (T1)timestamp_ms / (T1)MILLISECONDS_IN_SECOND;
+		return (T1)timestamp_ms / (T1)MS_PER_SEC;
 	}
 
 	/** \brief Задержка на указанное количество миллисекунд

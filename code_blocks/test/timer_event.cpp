@@ -3,18 +3,19 @@
 #include <ztime.hpp>
 
 int main() {
-
+//------------------------------------------------------------------------------
     std::cout << "test async-timer" << std::endl;
     {
         ztime::Timer timer_a;
         ztime::Timer timer(1000, [&](){
-            std::cout << "elapsed: " << timer_a.get_elapsed() << std::endl;
+            std::cout << "elapsed: " << timer_a.elapsed() << std::endl;
             timer_a.reset();
         });
         std::system("pause");
         std::cout << "destroy" << std::endl;
     }
     std::cout << "destroy ok" << std::endl;
+//------------------------------------------------------------------------------
     std::system("pause");
     std::cout << "start #1" << std::endl;
     {
