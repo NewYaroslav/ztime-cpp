@@ -162,7 +162,7 @@ namespace ztime {
 
 			WsaShell wsa_init;
 			if (wsa_init.check_error()) {
-				if (on_error != nullptr) {
+				if (on_error) {
 					on_error (wsa_init.get_error(), "WSAStartup failed: " + std::to_string(wsa_init.get_error()));
 				}
 				return false;
@@ -170,15 +170,15 @@ namespace ztime {
 
 			sockfd = socket( AF_INET, SOCK_DGRAM, IPPROTO_UDP ); // Create a UDP socket.
 			if ( sockfd == INVALID_SOCKET ) {
-				if (on_error != nullptr) {
+				if (on_error) {
 					on_error (res, "Error at socket: " + std::to_string(WSAGetLastError()));
 				}
 				return false;
 			}
 
 			server = gethostbyname(config.host_name.c_str()); // Convert URL to IP.
-			if (server == nullptr) {
-				if (on_error != nullptr) {
+			if (!server) {
+				if (on_error) {
 					on_error (0, "ERROR, no such host");
 				}
 				closesocket(sockfd);
@@ -204,12 +204,12 @@ namespace ztime {
 				return false;
 			}
 
-			#if defined (_WIN32) || defined (__CYGWIN__) || defined (__MINGW32__) || defined (__MINGW64__) || defined (__GNUC__)
+#if         defined (_WIN32) || defined (__CYGWIN__) || defined (__MINGW32__) || defined (__MINGW64__) || defined (__GNUC__)
 			DWORD dw = (config.timeout.tv_sec * 1000) + ((config.timeout.tv_usec + 999) / 1000);
 			setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &dw, sizeof(dw));
-			#else
+#           else
 			setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &config.timeout, sizeof(struct timeval));
-			#endif
+#           endif
 
 			// подготавлвиаем пакет и делаем запрос
 			ntp_packet packet;// = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -218,7 +218,7 @@ namespace ztime {
 			// Send it the NTP packet it wants. If n == -1, it failed.
 			res = send(sockfd, (char*)&packet, sizeof(ntp_packet), 0);
 			if (res == SOCKET_ERROR) {
-				if (on_error != nullptr) {
+				if (on_error) {
 					on_error (0, "ERROR writing to socket");
 				}
 				return false;
@@ -227,7 +227,7 @@ namespace ztime {
 			// Wait and receive the packet back from the server. If n == -1, it failed.
 			res = recv(sockfd, (char*)&packet, sizeof(ntp_packet), 0);
 			if (res < 0) {
-				if (on_error != nullptr) {
+				if (on_error) {
 					on_error (0, "ERROR reading from socket");
 				}
 				return false;
@@ -237,7 +237,7 @@ namespace ztime {
 
 			res = closesocket(sockfd);
 			if (res == SOCKET_ERROR) {
-				if (on_error != nullptr) {
+				if (on_error) {
 					on_error (WSAGetLastError(), "closesocket failed with error");
 				}
 				return false;

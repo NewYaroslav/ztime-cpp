@@ -31,6 +31,7 @@
 #include <functional>
 #include <algorithm>
 #include <cmath>
+#include "parts/ztime_timer.hpp"
 
 #if __cplusplus <= 201103L
 #	define ZTIME_CONSTEXPR
@@ -732,6 +733,7 @@ namespace ztime {
 		void set_oadate(const oadate_t oadate);
 	};
 
+	#if(0)
 	/** \brief Таймер для измерений задержек
 	 */
 	class Timer {
@@ -808,6 +810,7 @@ namespace ztime {
 			return sum / (double)counter;
 		}
 	};
+	#endif
 
 	/** \brief Конвертировать строку в формате ISO в данные класса DateTime
 	 * \param str_datetime	Cтрока в формате ISO, например 2013-12-06T15:23:01+00:00
