@@ -8,112 +8,108 @@
 
 ## Перечисления и константы
 
+Все перечисления и константы представлены в файле *ztime_definitions.hpp*
+
 ```cpp
-    const timestamp_t TIMESTAMP_MAX = 0xFFFFFFFFFFFFFFFF;   ///< Максимально возможное значение для типа timestamp_t
-    const oadate_t OADATE_MAX = 9223372036854775807;        ///< Максимально возможное значение даты автоматизации (OADate)
-    const double AVERAGE_DAYS_IN_YEAR = 365.25;             ///< Среднее количество дней за год
-	
-    /// Различные периоды
-    enum {
-        NANOSECONDS_IN_SECOND = 1000000000,	///< Количество наносекунд в одной секунде
-        MICROSECONDS_IN_SECOND = 1000000,	///< Количество микросекунд в одной секунде
-		MILLISECONDS_IN_SECOND = 1000,		///< Количество миллисекунд в одной секунде
-        MILLISECONDS_IN_MINUTE = 60000,		///< Количество миллисекунд в одной минуте
-        MILLISECONDS_IN_HALF_HOUR = 1800000,///< Количество миллисекунд в получасе
-        MILLISECONDS_IN_HOUR = 3600000,     ///< Количество миллисекунд в часе
-        MILLISECONDS_IN_DAY = 86400000,     ///< Количество миллисекунд в одном дне
-		SECONDS_IN_MINUTE = 60,	            ///< Количество секунд в одной минуте
-        SECONDS_IN_HALF_HOUR = 1800,        ///< Количество секунд в получасе
-        SECONDS_IN_HOUR = 3600,	            ///< Количество секунд в часе
-        SECONDS_IN_DAY = 86400,	            ///< Количество секунд в дне
-        SECONDS_IN_YEAR = 31536000,	        ///< Количество секунд за год
-        SECONDS_IN_LEAP_YEAR = 31622400,	///< Количество секунд за високосный год
-        AVERAGE_SECONDS_IN_YEAR = 31557600, ///< Среднее количество секунд за год
-        SECONDS_IN_4_YEAR = 126230400,	    ///< Количество секунд за 4 года
-        MINUTES_IN_HOUR = 60,               ///< Количество минут в одном часе
-        MINUTES_IN_DAY = 1440,              ///< Количество минут в одном дне
-		MINUTES_IN_WEEK = 10080,            ///< Количество минут в одной неделе
-		MINUTES_IN_MONTH = 40320,           ///< Количество минут в одном месяце
-        HOURS_IN_DAY = 24,                  ///< Количество часов в одном дне
-        MONTHS_IN_YEAR = 12,                ///< Количество месяцев в году
-        DAYS_IN_WEEK = 7,                   ///< Количество дней в неделе
-        DAYS_IN_LEAP_YEAR = 366,            ///< Количество дней в високосом году
-        DAYS_IN_YEAR = 365,                 ///< Количество дней в году
-        DAYS_IN_4_YEAR = 1461,              ///< Количество дней за 4 года
-        FIRST_YEAR_UNIX = 1970,             ///< Год начала UNIX времени
-        MAX_DAY_MONTH = 31,                 ///< Максимальное количество дней в месяце
-        OADATE_UNIX_EPOCH = 25569,          ///< Дата автоматизации OLE с момента эпохи UNIX
-    };
+const timestamp_t   MAX_TIMESTAMP   = std::numeric_limits<timestamp_t>::max();
+// Maximum possible automation date value (OADate)
+const oadate_t      MAX_OADATE      = std::numeric_limits<oadate_t>::max();
+// Average number of days per year
+const double AVG_DAYS_PER_YEAR      = 365.25;
 
-    /// Скоращенные имена дней неделии
-    enum {
-        SUN = 0,    ///< Воскресенье
-        MON,        ///< Понедельник
-        TUS,        ///< Вторник
-        WED,        ///< Среда
-        THU,        ///< Четверг
-        FRI,        ///< Пятница
-        SAT,        ///< Суббота
-    };
+enum TimeConstants {
+	NS_PER_SEC = 1000000000,
+	US_PER_SEC = 1000000,
+	MS_PER_SEC = 1000,
+	MS_PER_MIN = 60000,
+	MS_PER_HALF_HOUR = 1800000,
+	MS_PER_HOUR = 3600000,
+	MS_PER_DAY = 86400000,
+	SEC_PER_MIN = 60,
+	SEC_PER_HALF_HOUR = 1800,
+	SEC_PER_HOUR = 3600,
+	SEC_PER_DAY = 86400,
+	SEC_PER_YEAR = 31536000,
+	SEC_PER_LEAP_YEAR = 31622400,
+	AVG_SEC_PER_YEAR = 31557600,
+	SEC_PER_4_YEARS = 126230400,
+	MIN_PER_HOUR = 60,
+	MIN_PER_DAY = 1440,
+	MIN_PER_WEEK = 10080,
+	MIN_PER_MONTH = 40320,
+	HOURS_PER_DAY = 24,
+	DAYS_PER_WEEK = 7,
+	DAYS_PER_LEAP_YEAR = 366,   ///< Number of days in a leap year (Количество дней в високосном году)
+	DAYS_PER_YEAR = 365,
+	DAYS_PER_4_YEARS = 1461,    ///< Number of days in 4 years (Количество дней за 4 года)
+	MONTHS_PER_YEAR = 12,
+	MAX_DAYS_PER_MONTH = 31,    ///< Maximum number of days in a month (Максимальное количество дней в месяце)
+	UNIX_EPOCH = 1970,          ///< Starting year of UNIX time (Год начала UNIX времени)
+	OLE_EPOCH = 25569,          ///< OLE automation date since UNIX epoch (Дата автоматизации OLE с момента эпохи UNIX)
+};
 
-    /// Скоращенные имена месяцев
-    enum {
-        JAN = 1,    ///< Январь
-        FEB,        ///< Февраль
-        MAR,        ///< Март
-        APR,        ///< Апрель
-        MAY,        ///< Май
-        JUNE,       ///< Июнь
-        JULY,       ///< Июль
-        AUG,        ///< Август
-        SEPT,       ///< Сентябрь
-        OCT,        ///< Октябрь
-        NOV,        ///< Ноябрь
-        DEC,        ///< Декабрь
-    };
-	
-	/// Фазы Луны
-    enum {
-        WAXING_CRESCENT_MOON,
-        FIRST_QUARTER_MOON,
-        WAXING_GIBBOUS_MOON,
-        FULL_MOON,
-        WANING_GIBBOUS_MOON,
-        LAST_QUARTER_MOON,
-        WANING_CRESCENT_MOON,
-        NEW_MOON,
-    };
+enum Weekday {
+	SUN = 0,    ///< Sunday
+	MON,        ///< Monday
+	TUE,        ///< Tuesday
+	WED,        ///< Wednesday
+	THU,        ///< Thursday
+	FRI,        ///< Friday
+	SAT         ///< Saturday
+};
 
-    const std::array<std::string, MONTHS_IN_YEAR> month_name_long = {
-        "January","February","March",
-        "April","May","June",
-        "July","August","September",
-        "October","November","December",
-    }; /**< Длинные имена месяцев */
+enum Month {
+	JAN = 1,    ///< January
+	FEB,        ///< February
+	MAR,        ///< March
+	APR,        ///< April
+	MAY,        ///< May
+	JUN,        ///< June
+	JUL,        ///< July
+	AUG,        ///< August
+	SEP,        ///< September
+	OCT,        ///< October
+	NOV,        ///< November
+	DEC         ///< December
+};
 
-    const std::array<std::string, MONTHS_IN_YEAR> month_name_short = {
-        "Jan","Feb","Mar",
-        "Apr","May","June",
-        "July","Aug","Sept",
-        "Oct","Nov","Dec",
-    }; /**< Сокращенные имена месяцев */
-	
-    const std::array<std::string, DAYS_IN_WEEK> weekday_name_short = {
-        "SUN",
-        "MON",
-        "TUS",
-        "WED",
-        "THU",
-        "FRI",
-        "SAT",
-    }; /**< Сокращенные имена дней недели */
+const char* const MonthNameLong[] = {
+	"January", "February", "March",
+	"April", "May", "June",
+	"July", "August", "September",
+	"October", "November", "December"
+};
+
+const char* const MonthNameShort[] = {
+	"Jan", "Feb", "Mar",
+	"Apr", "May", "Jun",
+	"Jul", "Aug", "Sep",
+	"Oct", "Nov", "Dec"
+};
+
+const char* const WeekdayNameShort[] = {
+	"SUN", "MON", "TUE",
+	"WED", "THU", "FRI",
+	"SAT"
+};
 ```
 
-## Функции и методы
+## Классы
 
-### Методы класса MoonPhase
+### Timer
+
+Многофункциональный класс. Подходит для следующих задач:
+
+* Измерение прошедшего времени, например задержки на выполнение участка кода.
+* Измерение среднего прошедшего времени, например задержки на выполнение участка кода.
+* Асинхронный вызов callback-функции с заданным периодом
+* Асинхронный вызов callback-функции с изменяемым периодом
+
+### MoonPhase
 
 Данный класс используется для расчета фаз Луны и поиска даты следующего новолуния
+
+#### Методы класса MoonPhase
 
 * void init(const ztime::ftimestamp_t timestamp)				- Инициализация переменных класса, касаемых возраста, фазы луны и т.д.
 * void phasehunt(const ztime::timestamp_t timestamp) 			- Расчитать даты различных фаз Луны
@@ -122,9 +118,11 @@
 * double calc_phase_v3(const ztime::ftimestamp_t timestamp) 	- Посчитать Фазу Луны, основываясь на датах новолуния
 * uint32_t get_moon_minute(const ztime::ftimestamp_t timestamp)	- Получить Лунную минуту (от 0 до 42523)
 
-### Методы класса DateTime
+### DateTime
 
 Данный класс используется для хранения времени в "понятной дате"
+
+#### Методы класса DateTime
 
 * set_beg_day() - установить начало дня
 * set_end_day() - установить конец дня
@@ -145,9 +143,11 @@
 * set_oadate() - Установить дату автоматизации OLE
 * oadate_t get_oadate() - Получить дату автоматизации OLE
 
-### Методы класса NtpClient
+### NtpClient
 
 Данный класс позволяет сделать замер смещения времени и используется в составле классов NtpClientPool и ntp
+
+#### Методы класса NtpClient
 
 * set_host 			- Установить хост
 * make_measurement 	- Сделать замер смещения времени
@@ -159,9 +159,11 @@
 * get_timestamp		- Получить метку времени в секундах
 * get_ftimestamp	- Получить метку времени в секундах с плавающей запятой
 
-### Методы класса NtpClientPool
+### NtpClientPool
 
-Данный класс позволяет сделать замер смещения времени сразу по пулу серверов NTP
+Данный класс позволяет сделать замер смещения времени и используется в составле классов NtpClientPool и ntp
+
+#### Методы класса NtpClientPool
 
 * set_delay_measurements	- Установить время между измерениями пула NTP
 * set_stop_measurements		- Установить количество удачных измерений пула NTP для остановки
@@ -180,9 +182,11 @@
 * get_timestamp				- Получить метку времени в секундах
 * get_ftimestamp			- Получить метку времени в секундах с плавающей запятой
 
-### Методы класса ntp
+### ntp
 
 Данный класс позволяет сделать замер смещения времени сразу по пулу серверов NTP, получать актуальные данные смещения с заданной переодичностью и вызывать методы для получения времени в любом месте программы
+
+#### Методы класса ntp
 
 * init								- Инициализировать NTP
 * make_measurement					- Сделать замер
@@ -198,7 +202,9 @@
 * get_ftimestamp					- Получить метку времени в секундах с плавающей запятой
 
 
-### Получение времени компьютера
+## Функции
+
+### Получение времени машины
 
 * uint32_t get_millisecond() 		- Получить миллисекунду секунды
 * uint32_t get_microsecond() 		- Получить микросекунду секунды
@@ -393,54 +399,6 @@ cout << "to_string " << ztime::to_string("%hh:%mm.%sss",ztime::get_ftimestamp(31
 
 * void delay_ms(const uint64_t milliseconds) - Задержка на указанное количество миллисекунд
 * void delay(const uint64_t seconds) - Задержка на указанное количество секунд
-
-### Замер времени выполнения
-
-Класс **Timer** предоставляет следующие методы:
-
-```C++
-
-/** \brief Сбросить значение таймера
- *
- * Данный метод нужно применять только вместе с методом elapsed()
- * При использовании метода
- * get_average_measurements() сбрасывать таймер не нужно!
- */
-inline void reset();
-
-/** \brief Получить замер времени
- * \return Время в секундах с момента инициализации класса или после reset()
- */
-inline double get_elapsed();
-
-/** \brief Сбросить все замеры
- *
- * Данный метод обнуляет сумму замеров и их количество
- */
-inline void reset_measurement();
-
-/** \brief Начать замер
- *
- * Данный метод использовать вместе с методами stop_measurement()
- * и get_average_measurements()
- */
-inline void start_measurement();
-
-/** \brief Остановить замер
- *
- * Данный метод использовать вместе с методами start_measurement()
- * и get_average_measurements()
- */
-inline void stop_measurement();
-
-/** \brief Получить результаты замеров
- *
- * Данный метод использовать вместе с методами start_measurement()
- * и stop_measurement(). Метод возвращает средний результат замеров
- * \return Среднее время замеров в секундах
- */
-inline double get_average_measurements();
-```
 
 ## Быстрый обзор
 
