@@ -42,14 +42,36 @@
 
 namespace ztime {
 
-    // Функция для преобразования метки времени из секунд в миллисекунды
+    /** \brief Function for converting a timestamp from seconds to milliseconds
+     * \param t Timestamp in seconds
+     * \return Timestamp in milliseconds
+     */
     constexpr inline timestamp_ms_t sec_to_ms(const timestamp_t t) noexcept {
         return t * MS_PER_SEC;
     }
 
-    // Функция для преобразования метки времени из миллисекунд в секунды
+    /** \brief Function for converting a timestamp from seconds to milliseconds
+     * \param t Timestamp in floating-point seconds
+     * \return Timestamp in milliseconds
+     */
+    constexpr inline timestamp_ms_t fsec_to_ms(const ftimestamp_t t) noexcept {
+        return (timestamp_ms_t)(t * (ftimestamp_t)MS_PER_SEC + 0.5);
+    }
+
+    /** \brief Function for converting a timestamp from milliseconds to seconds
+     * \param t Timestamp in milliseconds
+     * \return Timestamp in seconds
+     */
     constexpr inline timestamp_t ms_to_sec(const timestamp_ms_t t_ms) noexcept {
         return t_ms / MS_PER_SEC;
+    }
+
+    /** \brief Function for converting a timestamp from milliseconds to seconds
+     * \param t Timestamp in milliseconds
+     * \return Timestamp in floating-point seconds
+     */
+    constexpr inline ftimestamp_t ms_to_fsec(const timestamp_ms_t t_ms) noexcept {
+        return t_ms / (ftimestamp_t)MS_PER_SEC;
     }
 
     /** \brief Получить миллисекунду секунды

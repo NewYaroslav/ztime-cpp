@@ -7,7 +7,7 @@ int main() {
     std::cout << "test async-timer" << std::endl;
     {
         ztime::Timer timer_a;
-        ztime::Timer timer(1000, [&](){
+        ztime::Timer timer(1000, ztime::Timer::TimerMode::STRICT_INTERVAL, [&](){
             std::cout << "elapsed: " << timer_a.elapsed() << std::endl;
             timer_a.reset();
         });

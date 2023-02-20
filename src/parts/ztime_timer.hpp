@@ -41,21 +41,31 @@ namespace ztime {
 
         std::atomic<uint32_t> period_ms = ATOMIC_VAR_INIT(0);
 
+        enum class TimerMode {
+            STRICT_INTERVAL,            /**< First timer mode, where the timer calls the callback at fixed intervals by resetting its internal counter before the callback is called. */
+            UNSTABLE_INTERVAL,          /**< Second timer mode, where the timer resets its counter after the callback is called, making the period between callbacks unstable. */
+            ONE_SHOT_AFTER_INTERVAL,    /**< Third timer mode, where the timer calls the callback only once after a set amount of time, if its counter is not reset during that time. */
+        };
+
         Timer() :  m_start_time(clock_t::now()) {};
+
+
+        Timer(  const uint32_t interval_ms,
+                const TimerMode mode,
+                const std::function<void()> &callback) : Timer() {
+            create_event(interval_ms, mode, callback);
+        }
 
         /** \brief Non-blocking async timer constructor
          * \param callback Your callback function that will be called asynchronously with a period of period_ms
          */
-        Timer(const uint32_t interval_ms, const std::function<void()> &callback) : Timer() {
-            create_event(interval_ms, callback);
-        }
-
-        Timer(const std::function<void()> &callback) : Timer(0, callback) {
-
+        Timer(const std::function<void()> &callback) :
+            Timer(0, TimerMode::UNSTABLE_INTERVAL, callback) {
         }
 
         ~Timer() {
             m_shutdown = true;
+            m_cv.notify_one();
             if(m_timer_future.valid()) {
                 try {
                     m_timer_future.wait();
@@ -64,33 +74,54 @@ namespace ztime {
             }
         }
 
-        bool create_event(const uint32_t interval_ms, const std::function<void()> &callback) {
+        bool create_event(
+                const uint32_t interval_ms,
+                const TimerMode mode,
+                const std::function<void()> &callback) {
             try {
-                std::call_once(m_once, [&, callback](){
+                std::call_once(m_once, [&, callback, mode]() {
                     if (callback) {
                         period_ms = interval_ms;
-                        m_timer_future = std::async(std::launch::async, [&, callback]() {
-
-                            std::mutex mtx;
-                            std::condition_variable cv;
+                        m_timer_future = std::async(std::launch::async, [&, callback, mode]() {
 
                             using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
+                            using ms64_t = std::chrono::duration<uint64_t, std::ratio<1, 1000>>;
+
                             std::chrono::time_point<clock_t> start_time = clock_t::now();
 
+                            if (mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                                m_event_start_time = clock_t::now();
+                            }
+
                             while (!false) {
-                                std::unique_lock<std::mutex> lock(mtx);
-                                cv.wait_for(lock, std::chrono::milliseconds(1));
+                                std::unique_lock<std::mutex> lock(m_event_mtx);
+                                m_cv.wait_for(lock, std::chrono::milliseconds(1));
+                                lock.unlock();
 
                                 if (m_shutdown) return;
                                 if (!period_ms) continue;
 
-                                const uint32_t elapsed =
-                                    std::chrono::duration_cast<ms_t>(
-                                        clock_t::now() - start_time).count();
+                                if (mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                                    std::unique_lock<std::mutex> lock(m_event_time);
+                                    const uint64_t elapsed = get_elapsed<uint64_t, ms64_t>(m_event_start_time);
+                                    if (elapsed < period_ms) continue;
+                                    if (m_once_event) continue;
+                                    m_once_event = true;
+                                    lock.unlock();
+                                    callback();
+                                    continue;
+                                }
+
+                                const uint32_t elapsed = get_elapsed<uint32_t, ms_t>(start_time);
 
                                 if (elapsed >= period_ms) {
-                                    start_time = clock_t::now();
+                                    if (mode == TimerMode::STRICT_INTERVAL) {
+                                        start_time = clock_t::now();
+                                    }
                                     callback();
+                                    if (mode == TimerMode::UNSTABLE_INTERVAL) {
+                                        start_time = clock_t::now();
+                                    }
                                 }
                             }
                         });
@@ -103,7 +134,27 @@ namespace ztime {
         }
 
         bool create_event(const std::function<void()> &callback) {
-            return create_event(0, callback);
+            return create_event(0, TimerMode::UNSTABLE_INTERVAL, callback);
+        }
+
+        /** \brief Reset the event timer counter
+         * This method resets the event timer counter in ONE_SHOT_AFTER_INTERVAL mode
+         * The method should be called within the specified interval to prevent the timer from calling the callback
+         */
+        inline void reset_event() noexcept {
+            std::unique_lock<std::mutex> lock(m_event_time);
+            m_once_event = false;
+            m_event_start_time = clock_t::now();
+        }
+
+        inline void set_name(const std::string &name) noexcept {
+            std::unique_lock<std::mutex> lock(m_name_mtx);
+            m_name = name;
+        }
+
+        inline std::string get_name() noexcept {
+            std::unique_lock<std::mutex> lock(m_name_mtx);
+            return m_name;
         }
 
         /** \brief Reset the timer value
@@ -234,7 +285,23 @@ namespace ztime {
             return m_start_time;
         }
 
-        std::future<void> m_timer_future;
+        template<class T1, class T2>
+        inline T1 get_elapsed(std::chrono::time_point<clock_t> &start_time) noexcept {
+            return std::chrono::duration_cast<T2>(
+                clock_t::now() - start_time).count();
+        }
+
+        std::string m_name;
+        std::mutex  m_name_mtx;
+
+        std::mutex                          m_event_time;
+        std::chrono::time_point<clock_t>    m_event_start_time;
+        bool                                m_once_event = false;
+
+        std::future<void>       m_timer_future;
+        std::mutex              m_event_mtx;
+        std::condition_variable m_cv;
+
         std::atomic<bool> m_shutdown = ATOMIC_VAR_INIT(false);
         std::once_flag    m_once;
     };

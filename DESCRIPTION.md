@@ -101,9 +101,45 @@ const char* const WeekdayNameShort[] = {
 Многофункциональный класс. Подходит для следующих задач:
 
 * Измерение прошедшего времени, например задержки на выполнение участка кода.
-* Измерение среднего прошедшего времени, например задержки на выполнение участка кода.
+* Измерение среднего прошедшего времени
 * Асинхронный вызов callback-функции с заданным периодом
 * Асинхронный вызов callback-функции с изменяемым периодом
+* Асинхронный вызов callback-функции через заданное время в случае отсутствия обнуления счетчика
+
+У таймера есть три режима:
+
+```cpp
+enum class TimerMode {
+	STRICT_INTERVAL,            /**< First timer mode, where the timer calls the callback at fixed intervals by resetting its internal counter before the callback is called. */
+	UNSTABLE_INTERVAL,          /**< Second timer mode, where the timer resets its counter after the callback is called, making the period between callbacks unstable. */
+	ONE_SHOT_AFTER_INTERVAL,    /**< Third timer mode, where the timer calls the callback only once after a set amount of time, if its counter is not reset during that time. */
+};
+```
+
+Пример использования режима STRICT_INTERVAL и UNSTABLE_INTERVAL:
+
+```cpp
+ztime::Timer timer1(1000, ztime::Timer::TimerMode::STRICT_INTERVAL, [&](){
+	std::cout << "event 1" << std::endl;
+});
+
+ztime::Timer timer2(1000, ztime::Timer::TimerMode::UNSTABLE_INTERVAL, [&](){
+	std::cout << "event 2" << std::endl;
+});
+```
+
+Разница между режимами STRICT_INTERVAL и UNSTABLE_INTERVAL такая, что таймер с режимом UNSTABLE_INTERVAL перед обнулением счетчика ожидает завершение задачи в callback-функции, а режим STRICT_INTERVAL обнуляет счетчик перед вызовом callback-функции.
+
+Пример использования режима ONE_SHOT_AFTER_INTERVAL:
+
+```cpp
+ztime::Timer timer(1000, ztime::Timer::TimerMode::ONE_SHOT_AFTER_INTERVAL, [&](){
+	std::cout << "event" << std::endl;
+});
+
+// Откладываем вызов callback
+timer.reset_event();
+```
 
 ### MoonPhase
 
@@ -358,6 +394,11 @@ cout << "to_string " << ztime::to_string("%hh:%mm.%sss",ztime::get_ftimestamp(31
 * bool is_day_of_month(const uint32_t day, const uint32_t month, const uint32_t year) 	- Проверка корректность дня месяца
 
 ### Различные преобразования и вычисления
+
+* sec_to_ms		- Преобразовать секунды в миллисекунды
+* fsec_to_ms	- Преобразовать секунды с плавающей точкой в миллисекунды
+* ms_to_sec		- Преобразовать миллисекунды в секунды
+* ms_to_fsec	- Преобразовать миллисекунды в секунды с плавающей точкой 
 
 * timestamp_t get_first_timestamp_year(const timestamp_t timestamp = get_timestamp()) 		- Получить метку времени в начале года
 * timestamp_t get_last_timestamp_year(const timestamp_t timestamp = get_timestamp()) 		- Получить метку времени в конце года
