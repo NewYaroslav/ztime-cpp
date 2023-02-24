@@ -30,6 +30,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <future>
+#include <thread>
 #include <functional>
 
 namespace ztime {
@@ -64,72 +65,115 @@ namespace ztime {
         }
 
         ~Timer() {
-            m_shutdown = true;
-            m_cv.notify_one();
-            if(m_timer_future.valid()) {
-                try {
-                    m_timer_future.wait();
-                    m_timer_future.get();
-                } catch(...) {}
-            }
+            stop_event();
         }
 
         bool create_event(
                 const uint32_t interval_ms,
                 const TimerMode mode,
                 const std::function<void()> &callback) {
-            try {
-                std::call_once(m_once, [&, callback, mode]() {
-                    if (callback) {
-                        period_ms = interval_ms;
-                        m_timer_future = std::async(std::launch::async, [&, callback, mode]() {
+            std::unique_lock<std::mutex> lock(m_event_mtx);
+            if (m_event_init) return false;
+            if (!callback) return false;
+            m_event_init = true;
+            lock.unlock();
 
-                            using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
-                            using ms64_t = std::chrono::duration<uint64_t, std::ratio<1, 1000>>;
+            period_ms = interval_ms;
+            m_mode = mode;
+            m_callback = callback;
+            m_timer_future = std::async(std::launch::async, [this]() {
 
-                            std::chrono::time_point<clock_t> start_time = clock_t::now();
+                using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
+                using ms64_t = std::chrono::duration<uint64_t, std::ratio<1, 1000>>;
 
-                            if (mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
-                                m_event_start_time = clock_t::now();
-                            }
+                if (m_mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                    m_event_start_time = clock_t::now();
+                }
+                std::chrono::time_point<clock_t> start_time = clock_t::now();
 
-                            while (!false) {
-                                std::unique_lock<std::mutex> lock(m_event_mtx);
-                                m_cv.wait_for(lock, std::chrono::milliseconds(1));
-                                lock.unlock();
+                while (!false) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-                                if (m_shutdown) return;
-                                if (!period_ms) continue;
+                    if (m_shutdown) return;
+                    if (!period_ms) continue;
 
-                                if (mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
-                                    std::unique_lock<std::mutex> lock(m_event_time);
-                                    const uint64_t elapsed = get_elapsed<uint64_t, ms64_t>(m_event_start_time);
-                                    if (elapsed < period_ms) continue;
-                                    if (m_once_event) continue;
-                                    m_once_event = true;
-                                    lock.unlock();
-                                    callback();
-                                    continue;
-                                }
-
-                                const uint32_t elapsed = get_elapsed<uint32_t, ms_t>(start_time);
-
-                                if (elapsed >= period_ms) {
-                                    if (mode == TimerMode::STRICT_INTERVAL) {
-                                        start_time = clock_t::now();
-                                    }
-                                    callback();
-                                    if (mode == TimerMode::UNSTABLE_INTERVAL) {
-                                        start_time = clock_t::now();
-                                    }
-                                }
-                            }
-                        });
+                    if (m_mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                        std::unique_lock<std::mutex> lock(m_event_time);
+                        const uint64_t elapsed = get_elapsed<uint64_t, ms64_t>(m_event_start_time);
+                        if (elapsed < period_ms) continue;
+                        if (m_once_event) continue;
+                        m_once_event = true;
+                        lock.unlock();
+                        m_callback();
+                        continue;
                     }
-                });
-            } catch(...) {
-                return false;
-            }
+
+                    const uint32_t elapsed = get_elapsed<uint32_t, ms_t>(start_time);
+
+                    if (elapsed >= period_ms) {
+                        if (m_mode == TimerMode::STRICT_INTERVAL) {
+                            start_time = clock_t::now();
+                        }
+                        m_callback();
+                        if (m_mode == TimerMode::UNSTABLE_INTERVAL) {
+                            start_time = clock_t::now();
+                        }
+                    }
+                }
+            });
+            return true;
+        }
+
+        bool create_event(
+                const uint32_t interval_ms,
+                const TimerMode mode,
+                void (*callback_ptr)(void *user_data),
+                void *user_data = nullptr) {
+            std::unique_lock<std::mutex> lock(m_event_mtx);
+            if (m_event_init) return false;
+            if (!callback_ptr) return false;
+            m_event_init = true;
+            lock.unlock();
+
+            m_timer_future = std::async(std::launch::async, [this]() {
+                using ms_t = std::chrono::duration<uint32_t, std::ratio<1, 1000>>;
+                using ms64_t = std::chrono::duration<uint64_t, std::ratio<1, 1000>>;
+
+                if (m_mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                    m_event_start_time = clock_t::now();
+                }
+                std::chrono::time_point<clock_t> start_time = clock_t::now();
+
+                while (!false) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+                    if (m_shutdown) return;
+                    if (!period_ms) continue;
+
+                    if (m_mode == TimerMode::ONE_SHOT_AFTER_INTERVAL) {
+                        std::unique_lock<std::mutex> lock(m_event_time);
+                        const uint64_t elapsed = get_elapsed<uint64_t, ms64_t>(m_event_start_time);
+                        if (elapsed < period_ms) continue;
+                        if (m_once_event) continue;
+                        m_once_event = true;
+                        lock.unlock();
+                        m_callback_ptr(m_user_data);
+                        continue;
+                    }
+
+                    const uint32_t elapsed = get_elapsed<uint32_t, ms_t>(start_time);
+
+                    if (elapsed >= period_ms) {
+                        if (m_mode == TimerMode::STRICT_INTERVAL) {
+                            start_time = clock_t::now();
+                        }
+                        m_callback_ptr(m_user_data);
+                        if (m_mode == TimerMode::UNSTABLE_INTERVAL) {
+                            start_time = clock_t::now();
+                        }
+                    }
+                }
+            });
             return true;
         }
 
@@ -145,6 +189,16 @@ namespace ztime {
             std::unique_lock<std::mutex> lock(m_event_time);
             m_once_event = false;
             m_event_start_time = clock_t::now();
+        }
+
+        inline void stop_event() {
+            if(m_timer_future.valid()) {
+                m_shutdown = true;
+                try {
+                    m_timer_future.wait();
+                    m_timer_future.get();
+                } catch(...) {}
+            }
         }
 
         inline void set_name(const std::string &name) noexcept {
@@ -298,12 +352,15 @@ namespace ztime {
         std::chrono::time_point<clock_t>    m_event_start_time;
         bool                                m_once_event = false;
 
+        TimerMode               m_mode = TimerMode::UNSTABLE_INTERVAL;
+        void                    (*m_callback_ptr)(void *user_data) = nullptr;
+        void                    *m_user_data = nullptr;
+        std::function<void()>   m_callback = nullptr;
         std::future<void>       m_timer_future;
         std::mutex              m_event_mtx;
-        std::condition_variable m_cv;
+        bool                    m_event_init = false;
 
         std::atomic<bool> m_shutdown = ATOMIC_VAR_INIT(false);
-        std::once_flag    m_once;
     };
 
 }
