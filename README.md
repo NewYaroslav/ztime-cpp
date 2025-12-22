@@ -1,3 +1,5 @@
+# This project has moved to [time-shield](https://github.com/NewYaroslav/time-shield-cpp)
+
 # ztime-cpp
 C ++ library for working with date and time
 
